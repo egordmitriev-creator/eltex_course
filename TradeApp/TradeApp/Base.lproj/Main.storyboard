@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="UIMenu" message="Requires Xcode 11 or later." minToolsVersion="11.0" requiredIntegratedClassName="UICommandDiff"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="TradeApp" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <stackView opaque="NO" contentMode="scaleToFill" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="DVb-C2-CUu">
+                                <rect key="frame" x="15" y="118" width="363" height="35"/>
+                                <subviews>
+                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Поиск" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="amK-tD-Jrg">
+                                        <rect key="frame" x="0.0" y="0.0" width="245.33333333333334" height="35"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits"/>
+                                    </textField>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Qod-kX-yX5">
+                                        <rect key="frame" x="255.33333333333329" y="0.0" width="49.666666666666657" height="35"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="plain" image="magnifyingglass" catalog="system"/>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Hnm-gs-j7m">
+                                        <rect key="frame" x="315" y="0.0" width="48" height="35"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="plain" image="person" catalog="system"/>
+                                    </button>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="35" id="a9H-tF-0CN"/>
+                                </constraints>
+                            </stackView>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="ALb-d1-TqV">
+                                <rect key="frame" x="15" y="153" width="363" height="631"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" showsMenuAsPrimaryAction="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Wel-9q-ThR">
+                                        <rect key="frame" x="0.0" y="8" width="363" height="25"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="25" id="Z2m-we-SUo"/>
+                                        </constraints>
+                                        <menu key="menu" id="5kk-qm-c7A">
+                                            <children>
+                                                <command title="BTC" id="vfP-eR-BP3">
+                                                    <connections>
+                                                        <action selector="waluteSelection:" destination="dkx-z0-nzr" id="INX-0k-BHf"/>
+                                                    </connections>
+                                                </command>
+                                                <command title="USD" id="f5O-Zw-WIT">
+                                                    <connections>
+                                                        <action selector="waluteSelection:" destination="dkx-z0-nzr" id="c5S-8F-GyN"/>
+                                                    </connections>
+                                                </command>
+                                                <command title="RUB" id="G1j-ke-xbd">
+                                                    <connections>
+                                                        <action selector="waluteSelection:" destination="dkx-z0-nzr" id="J8E-tc-Kel"/>
+                                                    </connections>
+                                                </command>
+                                            </children>
+                                        </menu>
+                                        <state key="normal" title="Выбор валюты">
+                                            <color key="titleColor" systemColor="labelColor"/>
+                                        </state>
+                                    </button>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="5da-c8-Ign">
+                                        <rect key="frame" x="0.0" y="33" width="363" height="80"/>
+                                        <subviews>
+                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="imgbin-bitcoin-cryptocurrency-computer-icons-bitcoin-s88gnYNpMF09zXNdaggRxQ1i6" translatesAutoresizingMaskIntoConstraints="NO" id="Scq-cM-y9U">
+                                                <rect key="frame" x="10" y="15" width="50" height="50"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="width" constant="50" id="Cwg-71-cJ4"/>
+                                                    <constraint firstAttribute="height" constant="50" id="EFi-Vh-cek"/>
+                                                </constraints>
+                                            </imageView>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="BTC" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="RCj-Fs-IhX">
+                                                <rect key="frame" x="85" y="27" width="41" height="26.333333333333329"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="22"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Кол-во" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ZPT-9b-OY8">
+                                                <rect key="frame" x="238" y="22.666666666666657" width="110" height="35"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="35" id="88K-pQ-FSZ"/>
+                                                    <constraint firstAttribute="width" constant="110" id="cin-zh-CuS"/>
+                                                </constraints>
+                                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                                <textInputTraits key="textInputTraits"/>
+                                            </textField>
+                                        </subviews>
+                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                        <constraints>
+                                            <constraint firstItem="RCj-Fs-IhX" firstAttribute="centerY" secondItem="5da-c8-Ign" secondAttribute="centerY" id="0eU-E7-LUy"/>
+                                            <constraint firstItem="Scq-cM-y9U" firstAttribute="top" secondItem="5da-c8-Ign" secondAttribute="top" constant="15" id="4t0-b4-XFJ"/>
+                                            <constraint firstItem="RCj-Fs-IhX" firstAttribute="leading" secondItem="Scq-cM-y9U" secondAttribute="trailing" constant="25" id="5x9-VK-X7h"/>
+                                            <constraint firstAttribute="trailing" secondItem="ZPT-9b-OY8" secondAttribute="trailing" constant="15" id="doS-NS-3gQ"/>
+                                            <constraint firstItem="ZPT-9b-OY8" firstAttribute="centerY" secondItem="5da-c8-Ign" secondAttribute="centerY" id="j02-Qp-FNF"/>
+                                            <constraint firstAttribute="bottom" secondItem="Scq-cM-y9U" secondAttribute="bottom" constant="15" id="k2w-7C-ULD"/>
+                                            <constraint firstItem="Scq-cM-y9U" firstAttribute="leading" secondItem="5da-c8-Ign" secondAttribute="leading" constant="10" id="uUi-Zc-eJq"/>
+                                        </constraints>
+                                    </view>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3Rl-s5-aBn">
+                                        <rect key="frame" x="0.0" y="113" width="363" height="518"/>
+                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                    </view>
+                                </subviews>
+                                <edgeInsets key="layoutMargins" top="8" left="0.0" bottom="0.0" right="0.0"/>
+                            </stackView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="X73-IC-h9K">
+                                <rect key="frame" x="15" y="797.66666666666663" width="363" height="34.333333333333371"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="gray" title="RUN!!!"/>
+                            </button>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="ALb-d1-TqV" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="15" id="8dU-qk-8pP"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="X73-IC-h9K" secondAttribute="trailing" constant="15" id="B1g-xx-eQ1"/>
+                            <constraint firstItem="DVb-C2-CUu" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="Fbw-pp-Uy2"/>
+                            <constraint firstItem="DVb-C2-CUu" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="15" id="R8s-7b-eAx"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="DVb-C2-CUu" secondAttribute="trailing" constant="15" id="a0y-NM-XkU"/>
+                            <constraint firstItem="ALb-d1-TqV" firstAttribute="top" secondItem="DVb-C2-CUu" secondAttribute="bottom" id="agW-FX-D4a"/>
+                            <constraint firstItem="X73-IC-h9K" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="15" id="bQu-bK-Ed0"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="ALb-d1-TqV" secondAttribute="trailing" constant="15" id="baM-VZ-UTy"/>
+                            <constraint firstAttribute="bottom" secondItem="X73-IC-h9K" secondAttribute="bottom" constant="20" id="m8h-I0-kjA"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="ALb-d1-TqV" secondAttribute="bottom" id="nXB-ss-6TD"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="btn_select_click" destination="Wel-9q-ThR" id="o0a-Hb-QMd"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="135.1145038167939" y="137.32394366197184"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="imgbin-bitcoin-cryptocurrency-computer-icons-bitcoin-s88gnYNpMF09zXNdaggRxQ1i6" width="728" height="508"/>
+        <image name="magnifyingglass" catalog="system" width="128" height="117"/>
+        <image name="person" catalog="system" width="128" height="121"/>
+        <systemColor name="labelColor">
+            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>
