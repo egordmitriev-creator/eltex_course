@@ -65,6 +65,7 @@ protocol AICurrencyBotProtocol {
     var currency: String { get }
     var balance: Double { get }
     var isPositionOpen: Bool { get }
+    
     func startTrading() -> String
 }
 
@@ -75,32 +76,25 @@ final class AICurrencyBot: AICurrencyBotProtocol {
     let maxPrice: Double
         
     // Приватные свойства
-    private(set) var balance: Double
     private var iterations: Int
     private var currentPrice: Double = 0.0
     private var entryPrice: Double = 0.0
-    private(set) var isPositionOpen: Bool = false
     private var positionType: PositionTypes = .none
     private var decisionType: DecisionTypes = .ignore
     private var income: Double = 0.0
-    
     private var outString = ""
     
-    // Реализация требований протокола
-    var currentBalance: Double {
-        return balance
-    }
-    
-    var positionStatus: Bool {
-        return isPositionOpen
-    }
+    private(set) var balance: Double
+    private(set) var isPositionOpen: Bool = false
 
     // Инициализатор
-    init(initialBalance: Double = 1000.0,
-         iterations: Int = 20,
-         currency: String = "USD",
-         minPrice: Double = 20.0,
-         maxPrice: Double = 150.0) {
+    init(
+        initialBalance: Double = 1000.0,
+        iterations: Int = 20,
+        currency: String = "USD",
+        minPrice: Double = 20.0,
+        maxPrice: Double = 150.0
+    ) {
         self.balance = initialBalance
         self.iterations = iterations
         self.currency = currency
@@ -171,7 +165,16 @@ final class AICurrencyBot: AICurrencyBotProtocol {
 }
 
 // MARK: - Extension
-private extension AICurrencyBot {
+extension AICurrencyBot {
+    // Реализация требований протокола
+    var currentBalance: Double {
+        return balance
+    }
+    
+    var positionStatus: Bool {
+        return isPositionOpen
+    }
+    
     func getStatus() -> String {
         var status = "\nСтатус бота\n"
         status += "Баланс: \(formattedPrice(balance)) \(currency)\n"
