@@ -37,20 +37,26 @@ private extension ViewController {
         setupTabelView()
         setupRunButton()
         setupEmptyLabel()
+        setupSubviews()
+    }
+    
+    func setupSubviews() {
+        view.addSubview(tradeStackView)
+        view.addSubview(emptyLabel)
+        
+        tradeStackView.addArrangedSubview(searchbarStackView)
+        tradeStackView.addArrangedSubview(tableView)
+        tradeStackView.addArrangedSubview(runButton)
+        
+        searchbarStackView.addArrangedSubview(searchbarTextField)
+        searchbarStackView.addArrangedSubview(searchbarSearchBtn)
+        searchbarStackView.addArrangedSubview(searchbarProfileBtn)
     }
     
     func setupTradeStackView() {
         tradeStackView.axis = .vertical
         tradeStackView.spacing = 8
         tradeStackView.translatesAutoresizingMaskIntoConstraints = false
-        
-        view.addSubview(tradeStackView)
-        
-        tradeStackView.addArrangedSubview(searchbarStackView)
-        tradeStackView.addArrangedSubview(tableView)
-        tradeStackView.addArrangedSubview(runButton)
-        
-        runButton.setContentHuggingPriority(.required, for: .vertical)
     }
     
     func setupSearchBar() {
@@ -60,21 +66,13 @@ private extension ViewController {
         searchbarStackView.translatesAutoresizingMaskIntoConstraints = false
         searchbarStackView.isLayoutMarginsRelativeArrangement = true
         searchbarStackView.layoutMargins = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
-        
         searchbarTextField.backgroundColor = .systemBackground
         searchbarTextField.layer.cornerRadius = 6
         searchbarTextField.placeholder = " Поиск"
-        
         searchbarSearchBtn.setImage(UIImage(systemName: "magnifyingglass"), for: .normal)
         searchbarSearchBtn.tintColor = .lightGray
-        
         searchbarProfileBtn.setImage(UIImage(systemName: "person"), for: .normal)
         searchbarProfileBtn.tintColor = .lightGray
-        
-        searchbarStackView.addArrangedSubview(searchbarTextField)
-        searchbarStackView.addArrangedSubview(searchbarSearchBtn)
-        searchbarStackView.addArrangedSubview(searchbarProfileBtn)
-        
         searchbarSearchBtn.translatesAutoresizingMaskIntoConstraints = false
         searchbarProfileBtn.translatesAutoresizingMaskIntoConstraints = false
     }
@@ -82,9 +80,7 @@ private extension ViewController {
     func setupTabelView() {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.register(TradeCell.self, forCellReuseIdentifier: TradeCell.identifier)
-        
         tableView.dataSource = self
-        
         tableView.backgroundColor = .secondarySystemBackground
     }
     
@@ -94,7 +90,7 @@ private extension ViewController {
         runButton.setTitle("RUN!!!", for: .normal)
         runButton.setTitleColor(.black, for: .normal)
         runButton.layer.cornerRadius = 16
-        
+        runButton.setContentHuggingPriority(.required, for: .vertical)
         runButton.addTarget(self, action: #selector(handleButtonTapped), for: .touchUpInside)
     }
     
@@ -104,8 +100,6 @@ private extension ViewController {
         emptyLabel.textAlignment = .center
         emptyLabel.textColor = .gray
         emptyLabel.font = .systemFont(ofSize: 18, weight: .medium)
-        
-        view.addSubview(emptyLabel)
     }
 }
 
