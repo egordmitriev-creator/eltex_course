@@ -65,7 +65,8 @@ protocol AICurrencyBotProtocol {
     var currency: String { get }
     var balance: Double { get }
     var isPositionOpen: Bool { get }
-    func startTrading() -> String
+    
+    func startTrading() -> [TradeMessage]
 }
 
 // MARK: Основной класс бота
@@ -75,32 +76,27 @@ final class AICurrencyBot: AICurrencyBotProtocol {
     let maxPrice: Double
         
     // Приватные свойства
-    private(set) var balance: Double
     private var iterations: Int
-    private var currentPrice: Double = 0.0
-    private var entryPrice: Double = 0.0
-    private(set) var isPositionOpen: Bool = false
+    private var currentPrice: Double = .zero
+    private var entryPrice: Double = .zero
     private var positionType: PositionTypes = .none
     private var decisionType: DecisionTypes = .ignore
-    private var income: Double = 0.0
+    private var income: Double = .zero
+    //private var outString = ""
     
-    private var outString = ""
+    private var messages: [TradeMessage] = []
     
-    // Реализация требований протокола
-    var currentBalance: Double {
-        return balance
-    }
-    
-    var positionStatus: Bool {
-        return isPositionOpen
-    }
+    private(set) var balance: Double
+    private(set) var isPositionOpen: Bool = false
 
     // Инициализатор
-    init(initialBalance: Double = 1000.0,
-         iterations: Int = 20,
-         currency: String = "USD",
-         minPrice: Double = 20.0,
-         maxPrice: Double = 150.0) {
+    init(
+        initialBalance: Double = 1000.0,
+        iterations: Int = 20,
+        currency: String = "USD",
+        minPrice: Double = 20.0,
+        maxPrice: Double = 150.0
+    ) {
         self.balance = initialBalance
         self.iterations = iterations
         self.currency = currency
@@ -109,22 +105,54 @@ final class AICurrencyBot: AICurrencyBotProtocol {
     }
         
     // Публичный метод для запуска торговли
-    func startTrading() -> String {
-        outString += "Начало торговли\n"
-        outString += "Стартовый баланс: \(formattedPrice(balance)) \(currency)\n"
+    func startTrading() -> [TradeMessage] {
+        messages.removeAll()
+        
+        messages.append(
+            TradeMessage(
+                id: UUID(),
+                text: "Start of trading",
+                tradeType: .ignore,
+                details: nil
+            )
+        )
+        
+        messages.append(
+            TradeMessage(
+                id: UUID(),
+                text: "Start balance: \(formattedPrice(balance))",
+                tradeType: .ignore,
+                details: nil
+            )
+        )
         
         for _ in 0...iterations {
             performTradingCycle()
         }
         
-        outString += "\nИтог торгов\n"
-        outString += "Баланс: \(formattedPrice(balance)) \(currency)"
+        messages.append(
+            TradeMessage(
+                id: UUID(),
+                text: "End of trading",
+                tradeType: .ignore,
+                details: nil
+            )
+        )
         
-        return outString
+        messages.append(
+            TradeMessage(
+                id: UUID(),
+                text: "Balance: \(formattedPrice(balance)) \(currency)",
+                tradeType: .ignore,
+                details: nil
+            )
+        )
+        
+        return messages
     }
         
     // Приватный метод для одного цикла торговли
-    private func performTradingCycle() -> String {
+    private func performTradingCycle() {
         currentPrice = Double.random(in: minPrice...maxPrice)
         decisionType = .ignore
             
@@ -136,13 +164,27 @@ final class AICurrencyBot: AICurrencyBotProtocol {
                 positionType = .buy
                 entryPrice = currentPrice
                 isPositionOpen = true
-                outString += "Открытие позиции: Покупка по \(formattedPrice(currentPrice)) \(currency)\n"
+                messages.append(
+                    TradeMessage(
+                        id: UUID(),
+                        text: "Opening a position: Buy at \(formattedPrice(currentPrice)) \(currency)",
+                        tradeType: .buy,
+                        details: nil
+                    )
+                )
             case 1:
                 decisionType = .sell
                 positionType = .sell
                 entryPrice = currentPrice
                 isPositionOpen = true
-                outString += "Открытие позиции: Продажа по \(formattedPrice(currentPrice)) \(currency)\n"
+                messages.append(
+                    TradeMessage(
+                        id: UUID(),
+                        text: "Opening a position: sell at \(formattedPrice(currentPrice)) \(currency)",
+                        tradeType: .sell,
+                        details: nil
+                    )
+                )
             default:
                 decisionType = .ignore
             }
@@ -158,20 +200,40 @@ final class AICurrencyBot: AICurrencyBotProtocol {
                 income = trade.income
                 balance += income
                 decisionType = (positionType == .buy) ? .sell : .buy
-                outString += "Закрытие позиции: \(trade.tradeInfo())\n"
+                messages.append(
+                    TradeMessage(
+                        id: UUID(),
+                        text: "Closing a position",
+                        tradeType: decisionType,
+                        details: trade.tradeInfo()
+                    )
+                )
                 isPositionOpen = false
                 positionType = .none
-            } else {
-                decisionType = .ignore
             }
         }
-        outString += "\(formattedPrice(currentPrice)) \(currency) - \(decisionType.rawValue)\n"
-        return outString
+        
+        messages.append(
+            TradeMessage(
+                id: UUID(),
+                text: "\(formattedPrice(currentPrice)) \(currency)",
+                tradeType: decisionType,
+                details: nil
+            )
+        )
     }
 }
 
 // MARK: - Extension
-private extension AICurrencyBot {
+extension AICurrencyBot {
+    var currentBalance: Double {
+        return balance
+    }
+    
+    var positionStatus: Bool {
+        return isPositionOpen
+    }
+    
     func getStatus() -> String {
         var status = "\nСтатус бота\n"
         status += "Баланс: \(formattedPrice(balance)) \(currency)\n"
@@ -183,17 +245,3 @@ private extension AICurrencyBot {
         return status
     }
 }
-
-
-
-// MARK: - Запуск бота
-//let bot = AICurrencyBot(
-//    initialBalance: 1000.0,
-//    iterations: 20,
-//    currency: "USD",
-//    minPrice: 20.0,
-//    maxPrice: 150.0
-//)
-//
-//bot.startTrading()
-//bot.printStatus()
