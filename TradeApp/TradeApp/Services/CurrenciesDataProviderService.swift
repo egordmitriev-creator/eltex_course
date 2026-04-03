@@ -25,22 +25,22 @@ enum SelectedSide {
 }
 
 // MARK: - Data Provider
-final class CurrenciesDataProviderService: NSObject {
-    
+final class CurrenciesDataProviderService: NSObject, CurrencyCellDelegate {
     // MARK: - Properties
     private(set) var currencies: [Currency] = []
     private(set) var filteredCurrencies: [Currency] = []
-    
     private(set) var selectedFirst: Currency?
     private(set) var selectedSecond: Currency?
-    
-    private(set) var rate: Double = 1.0
+    private(set) var rate: Double = .zero
     
     private var timer: Timer?
-    private var secondsLeft = 5
+    private var secondsLeft: Int = .zero
+    private var favorites: Set<String> = []
+    private var currentFilteredIndex: Int = .zero
     
     var selectingSide: SelectedSide = .first
     var onCurrencyChange: (() -> Void)?
+    var isFavoritesEnabled: Bool = false
     
     override init() {
         super.init()
@@ -63,14 +63,25 @@ final class CurrenciesDataProviderService: NSObject {
     }
     
     func applyFilter(filterIndex: Int) {
-        switch filterIndex {
+        currentFilteredIndex = filterIndex
+        applyCurrentFilters()
+    }
+    
+    func applyCurrentFilters() {
+        var result = currencies
+        switch currentFilteredIndex {
         case 1:
-            filteredCurrencies = currencies.filter { $0.type == .fiat }
+            result = result.filter { $0.type == .fiat }
         case 2:
-            filteredCurrencies = currencies.filter { $0.type == .crypto }
+            result = result.filter { $0.type == .crypto }
         default:
-            filteredCurrencies = currencies
+            break
         }
+        
+        if isFavoritesEnabled {
+            result = result.filter { favorites.contains($0.code) }
+        }
+        filteredCurrencies = result
     }
     
     func selectCurrency(_ currency: Currency) {
@@ -132,7 +143,12 @@ extension CurrenciesDataProviderService: UICollectionViewDataSource, UICollectio
         
         let disabled = (selectedFirst?.code == item.code) || (selectedSecond?.code == item.code)
         
-        cell.update(code: item.code, disabled: disabled)
+        cell.delegate = self
+        cell.update(
+            code: item.code,
+            disabled: disabled,
+            isFavorite: favorites.contains(item.code)
+        )
         return cell
     }
     
@@ -141,5 +157,17 @@ extension CurrenciesDataProviderService: UICollectionViewDataSource, UICollectio
         selectCurrency(currency)
         
         collectionView.reloadData()
+    }
+}
+
+extension CurrenciesDataProviderService: UICollisionBehaviorDelegate {
+    func didTapFavorite(code: String) {
+        if favorites.contains(code) {
+            favorites.remove(code)
+        } else {
+            favorites.insert(code)
+        }
+        applyCurrentFilters()
+        onCurrencyChange?()
     }
 }
