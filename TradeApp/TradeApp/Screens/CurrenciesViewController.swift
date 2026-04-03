@@ -45,6 +45,10 @@ final class CurrenciesViewController: UIViewController {
             }
         }
         
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tap.cancelsTouchesInView = false
+        view.addGestureRecognizer(tap)
+        
         updateUI()
         startTimer()
     }
@@ -184,5 +188,9 @@ private extension CurrenciesViewController {
         }, onRateUpdate: { [weak self] in
             self?.updateRateLabel()
         })
+    }
+    
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
     }
 }

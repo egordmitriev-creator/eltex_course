@@ -34,10 +34,10 @@ final class CurrenciesDataProviderService: NSObject {
     private(set) var selectedFirst: Currency?
     private(set) var selectedSecond: Currency?
     
-    private(set) var rate: Double = 1.0
+    private(set) var rate: Double = .zero
     
     private var timer: Timer?
-    private var secondsLeft = 5
+    private var secondsLeft: Int = .zero
     
     var selectingSide: SelectedSide = .first
     var onCurrencyChange: (() -> Void)?
@@ -49,8 +49,10 @@ final class CurrenciesDataProviderService: NSObject {
         selectedSecond = currencies[1]
         applyFilter(filterIndex: 0)
     }
-    
-    // MARK: - Data Manipulation
+}
+
+// MARK: - Data Manipulation
+extension CurrenciesDataProviderService {
     func generateCurrencies() {
         let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         currencies.removeAll()
@@ -94,8 +96,10 @@ final class CurrenciesDataProviderService: NSObject {
     func calculateResult(amount: Double) -> Double {
         return amount * rate
     }
-    
-    // MARK: - Timer
+}
+
+// MARK: - Timer
+extension CurrenciesDataProviderService {
     func startTimer(update: @escaping (Int) -> Void, onRateUpdate: @escaping () -> Void) {
         timer?.invalidate()
         secondsLeft = 5
