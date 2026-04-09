@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  TradeViewController.swift
 //  TradeApp
 //
 //  Created by egor_dmitriev on 19.03.2026.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class ViewController: UIViewController {
+final class TradeViewController: UIViewController {
     private let tradeStackView = UIStackView()
     private let searchbarStackView = UIStackView()
     private let searchbarTextField = UITextField()
@@ -28,7 +28,7 @@ final class ViewController: UIViewController {
 }
 
 // MARK: - Setup
-private extension ViewController {
+private extension TradeViewController {
     func setupViews() {
         view.backgroundColor = .systemBackground
         
@@ -103,7 +103,7 @@ private extension ViewController {
     }
 }
 
-extension ViewController: UITableViewDataSource {
+extension TradeViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         data.count
     }
@@ -117,7 +117,7 @@ extension ViewController: UITableViewDataSource {
 }
 
 // MARK: - Constraints
-private extension ViewController {
+private extension TradeViewController {
     func setupConstraints() {
         let constraints = [
             // tradeStackView
@@ -146,7 +146,7 @@ private extension ViewController {
 }
 
 // MARK: - Logic
-private extension ViewController {
+private extension TradeViewController {
     @objc func handleButtonTapped() {
         runBot()
     }

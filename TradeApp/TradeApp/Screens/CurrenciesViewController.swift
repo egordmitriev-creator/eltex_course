@@ -40,12 +40,7 @@ final class CurrenciesViewController: UIViewController{
         setutSubviews()
         setupConstraints()
         
-        dataProvider.onCurrencyChange = { [weak self] in
-            DispatchQueue.main.async {
-                self?.updateUI()
-                self?.collectionView.reloadData()
-            }
-        }
+        setupDataProviders()
         
         updateUI()
         startTimer()
@@ -99,7 +94,7 @@ private extension CurrenciesViewController {
     
     func setupConstraints() {
         NSLayoutConstraint.activate([
-            curencyButtonsStack.topAnchor.constraint(equalTo: view.topAnchor, constant: 40),
+            curencyButtonsStack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
             curencyButtonsStack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
             rateLabel.topAnchor.constraint(equalTo: curencyButtonsStack.bottomAnchor, constant: 8),
@@ -212,5 +207,17 @@ extension CurrenciesViewController: FavoritesViewDelegate{
         dataProvider.isFavoritesEnabled = isOn
         dataProvider.applyCurrentFilters()
         collectionView.reloadData()
+    }
+}
+
+
+private extension CurrenciesViewController {
+    func setupDataProviders() {
+        dataProvider.onCurrencyChange = { [weak self] in
+            DispatchQueue.main.async {
+                self?.updateUI()
+                self?.collectionView.reloadData()
+            }
+        }
     }
 }
