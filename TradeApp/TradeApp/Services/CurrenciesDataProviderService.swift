@@ -160,7 +160,7 @@ extension CurrenciesDataProviderService: UICollectionViewDataSource, UICollectio
     }
 }
 
-extension CurrenciesDataProviderService: UICollisionBehaviorDelegate {
+extension CurrenciesDataProviderService {
     func didTapFavorite(code: String) {
         if favorites.contains(code) {
             favorites.remove(code)
