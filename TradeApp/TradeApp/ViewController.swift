@@ -13,10 +13,11 @@ final class ViewController: UIViewController {
     private let searchbarTextField = UITextField()
     private let searchbarSearchBtn = UIButton()
     private let searchbarProfileBtn = UIButton()
-    private let tradeTextView = UITextView()
-    private let scrollView = UIScrollView()
     private let runButton = UIButton()
     private let emptyLabel = UILabel()
+    private let tableView: UITableView = UITableView()
+    
+    private var data: [TradeMessage] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,26 +34,29 @@ private extension ViewController {
         
         setupTradeStackView()
         setupSearchBar()
-        setupScrollView()
+        setupTabelView()
         setupRunButton()
         setupEmptyLabel()
+        setupSubviews()
+    }
+    
+    func setupSubviews() {
+        view.addSubview(tradeStackView)
+        view.addSubview(emptyLabel)
+        
+        tradeStackView.addArrangedSubview(searchbarStackView)
+        tradeStackView.addArrangedSubview(tableView)
+        tradeStackView.addArrangedSubview(runButton)
+        
+        searchbarStackView.addArrangedSubview(searchbarTextField)
+        searchbarStackView.addArrangedSubview(searchbarSearchBtn)
+        searchbarStackView.addArrangedSubview(searchbarProfileBtn)
     }
     
     func setupTradeStackView() {
         tradeStackView.axis = .vertical
         tradeStackView.spacing = 8
         tradeStackView.translatesAutoresizingMaskIntoConstraints = false
-        
-        view.addSubview(tradeStackView)
-        
-        tradeStackView.addArrangedSubview(searchbarStackView)
-        tradeStackView.addArrangedSubview(scrollView)
-        tradeStackView.addArrangedSubview(runButton)
-        
-        scrollView.setContentHuggingPriority(.defaultLow, for: .vertical)
-        scrollView.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
-        
-        runButton.setContentHuggingPriority(.required, for: .vertical)
     }
     
     func setupSearchBar() {
@@ -61,36 +65,23 @@ private extension ViewController {
         searchbarStackView.backgroundColor = .secondarySystemBackground
         searchbarStackView.translatesAutoresizingMaskIntoConstraints = false
         searchbarStackView.isLayoutMarginsRelativeArrangement = true
-        searchbarStackView.layoutMargins = UIEdgeInsets(top: 10, left: 12, bottom: 12, right: 12)
-        
+        searchbarStackView.layoutMargins = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
         searchbarTextField.backgroundColor = .systemBackground
         searchbarTextField.layer.cornerRadius = 6
         searchbarTextField.placeholder = " Поиск"
-        
         searchbarSearchBtn.setImage(UIImage(systemName: "magnifyingglass"), for: .normal)
         searchbarSearchBtn.tintColor = .lightGray
-        
         searchbarProfileBtn.setImage(UIImage(systemName: "person"), for: .normal)
         searchbarProfileBtn.tintColor = .lightGray
-        
-        searchbarStackView.addArrangedSubview(searchbarTextField)
-        searchbarStackView.addArrangedSubview(searchbarSearchBtn)
-        searchbarStackView.addArrangedSubview(searchbarProfileBtn)
-        
         searchbarSearchBtn.translatesAutoresizingMaskIntoConstraints = false
         searchbarProfileBtn.translatesAutoresizingMaskIntoConstraints = false
     }
     
-    func setupScrollView() {
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        tradeTextView.translatesAutoresizingMaskIntoConstraints = false
-        
-        tradeTextView.backgroundColor = .secondarySystemBackground
-        tradeTextView.isScrollEnabled = false
-        
-        scrollView.addSubview(tradeTextView)
-        
-        tradeTextView.isHidden = true
+    func setupTabelView() {
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.register(TradeCell.self, forCellReuseIdentifier: TradeCell.identifier)
+        tableView.dataSource = self
+        tableView.backgroundColor = .secondarySystemBackground
     }
     
     func setupRunButton() {
@@ -99,7 +90,7 @@ private extension ViewController {
         runButton.setTitle("RUN!!!", for: .normal)
         runButton.setTitleColor(.black, for: .normal)
         runButton.layer.cornerRadius = 16
-        
+        runButton.setContentHuggingPriority(.required, for: .vertical)
         runButton.addTarget(self, action: #selector(handleButtonTapped), for: .touchUpInside)
     }
     
@@ -109,15 +100,25 @@ private extension ViewController {
         emptyLabel.textAlignment = .center
         emptyLabel.textColor = .gray
         emptyLabel.font = .systemFont(ofSize: 18, weight: .medium)
+    }
+}
+
+extension ViewController: UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        data.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: TradeCell.identifier, for: indexPath) as! TradeCell
+        cell.currentMessage = data[indexPath.row]
         
-        view.addSubview(emptyLabel)
+        return cell
     }
 }
 
 // MARK: - Constraints
 private extension ViewController {
     func setupConstraints() {
-        
         let constraints = [
             // tradeStackView
             NSLayoutConstraint(item: tradeStackView, attribute: .top, relatedBy: .equal, toItem: view.safeAreaLayoutGuide, attribute: .top, multiplier: 1, constant: 8),
@@ -134,13 +135,6 @@ private extension ViewController {
             
             // run button height
             NSLayoutConstraint(item: runButton, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 32),
-            
-            // tradeTextView
-            NSLayoutConstraint(item: tradeTextView, attribute: .top, relatedBy: .equal, toItem: scrollView.contentLayoutGuide, attribute: .top, multiplier: 1, constant: 0),
-            NSLayoutConstraint(item: tradeTextView, attribute: .leading, relatedBy: .equal, toItem: scrollView.contentLayoutGuide, attribute: .leading, multiplier: 1, constant: 0),
-            NSLayoutConstraint(item: tradeTextView, attribute: .trailing, relatedBy: .equal, toItem: scrollView.contentLayoutGuide, attribute: .trailing, multiplier: 1, constant: 0),
-            NSLayoutConstraint(item: tradeTextView, attribute: .bottom, relatedBy: .equal, toItem: scrollView.contentLayoutGuide, attribute: .bottom, multiplier: 1, constant: 0),
-            NSLayoutConstraint(item: tradeTextView, attribute: .width, relatedBy: .equal, toItem: scrollView.frameLayoutGuide, attribute: .width, multiplier: 1, constant: 0),
             
             // emptyLabel
             NSLayoutConstraint(item: emptyLabel, attribute: .centerX, relatedBy: .equal, toItem: view, attribute: .centerX, multiplier: 1, constant: 0),
@@ -160,16 +154,15 @@ private extension ViewController {
     func runBot() {
         let bot = AICurrencyBot(
             initialBalance: 1000.0,
-            iterations: 20,
+            iterations: 30,
             currency: "USD",
             minPrice: 20.0,
             maxPrice: 150.0
         )
         
-        let result = bot.startTrading()
+        data = bot.startTrading()
         
-        tradeTextView.text = result
-        emptyLabel.isHidden = true
-        tradeTextView.isHidden = false
+        tableView.reloadData()
+        emptyLabel.isHidden = !data.isEmpty
     }
 }
