@@ -213,7 +213,6 @@ extension CurrenciesViewController: FavoritesViewDelegate{
 
 private extension CurrenciesViewController {
     func setupDataProviders() {
-        //dataProvider.onCurrencyChange = { [weak self] in
         dataProvider.addObserver { [weak self] in
             DispatchQueue.main.async {
                 self?.updateUI()

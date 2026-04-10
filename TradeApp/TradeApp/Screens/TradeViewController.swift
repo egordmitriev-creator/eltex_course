@@ -236,10 +236,12 @@ private extension TradeViewController {
     }
     
     @objc func pairTapped() {
-        let vc = CurrenciesViewController()
+        let vc = CurrenciesDetailViewController()
         vc.title = "Select currency"
+        
         let nav = UINavigationController(rootViewController: vc)
         nav.modalPresentationStyle = .pageSheet
+        
         present(nav, animated: true)
     }
     

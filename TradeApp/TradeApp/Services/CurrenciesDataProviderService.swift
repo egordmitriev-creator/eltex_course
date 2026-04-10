@@ -72,20 +72,6 @@ private extension CurrenciesDataProviderService {
         }
     }
     
-    func selectCurrency(_ currency: Currency) {
-        guard let first = selectedFirst, let second = selectedSecond else { return }
-        guard currency.code != first.code && currency.code != second.code else { return }
-        
-        if selectingSide == .first {
-            selectedFirst = currency
-        } else {
-            selectedSecond = currency
-        }
-        
-        updateRate()
-        notifyObservers()
-    }
-    
     func updateRate() {
         rate = Double.random(in: 0.001...1000)
     }
@@ -116,6 +102,20 @@ extension CurrenciesDataProviderService {
     
     func calculateResult(amount: Double) -> Double {
         return amount * rate
+    }
+    
+    func selectCurrency(_ currency: Currency) {
+        guard let first = selectedFirst, let second = selectedSecond else { return }
+        guard currency.code != first.code && currency.code != second.code else { return }
+        
+        if selectingSide == .first {
+            selectedFirst = currency
+        } else {
+            selectedSecond = currency
+        }
+        
+        updateRate()
+        notifyObservers()
     }
     
     // MARK: - Timer
