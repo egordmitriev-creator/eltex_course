@@ -18,20 +18,16 @@ final class CurrenciesDetailViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        view.backgroundColor = .systemBackground
         setupUI()
+        setupSubviews()
+        setupConstrains()
         generateShortList()
     }
 }
 
 private extension CurrenciesDetailViewController {
     func setupUI() {
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        allButton.translatesAutoresizingMaskIntoConstraints = false
-        
-        view.addSubview(tableView)
-        view.addSubview(allButton)
+        view.backgroundColor = .systemBackground
         
         tableView.dataSource = self
         tableView.delegate = self
@@ -41,6 +37,16 @@ private extension CurrenciesDetailViewController {
         allButton.setTitle("All", for: .normal)
         allButton.setTitleColor(.systemBlue, for: .normal)
         allButton.addTarget(self, action: #selector(openFullList), for: .touchUpInside)
+    }
+    
+    func setupSubviews() {
+        view.addSubview(tableView)
+        view.addSubview(allButton)
+    }
+    
+    func setupConstrains() {
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        allButton.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
             allButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
