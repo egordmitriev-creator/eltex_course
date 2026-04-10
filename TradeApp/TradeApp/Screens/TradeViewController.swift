@@ -17,6 +17,12 @@ final class TradeViewController: UIViewController {
     private let emptyLabel = UILabel()
     private let tableView: UITableView = UITableView()
     
+    private let pairView = UIStackView()
+    private let firstCurrencyLabel = UILabel()
+    private let secondCurrencyLabel = UILabel()
+    
+    private let dataProvider = CurrenciesDataProviderService.shared
+    
     private var data: [TradeMessage] = []
     
     override func viewDidLoad() {
@@ -24,6 +30,14 @@ final class TradeViewController: UIViewController {
         
         setupViews()
         setupConstraints()
+        updatePairUI()
+        
+        dataProvider.addObserver { [weak self] in
+            DispatchQueue.main.async {
+                self?.updatePairUI()
+                self?.resetTrading()
+            }
+        }
     }
 }
 
@@ -34,10 +48,32 @@ private extension TradeViewController {
         
         setupTradeStackView()
         setupSearchBar()
+        setupPairView()
         setupTabelView()
         setupRunButton()
         setupEmptyLabel()
         setupSubviews()
+        setupNavigationBar()
+    }
+    
+    func setupNavigationBar() {
+    let resetButton = UIBarButtonItem(
+            image: UIImage(systemName: "trash"),
+            style: .plain,
+            target: self,
+            action: #selector(resetTapped)
+        )
+        
+
+        let randomButton = UIBarButtonItem(
+            image: UIImage(systemName: "shuffle"),
+            style: .plain,
+            target: self,
+            action: #selector(randomTapped)
+        )
+        
+        navigationItem.leftBarButtonItem = resetButton
+        navigationItem.rightBarButtonItem = randomButton
     }
     
     func setupSubviews() {
@@ -45,6 +81,9 @@ private extension TradeViewController {
         view.addSubview(emptyLabel)
         
         tradeStackView.addArrangedSubview(searchbarStackView)
+        
+        tradeStackView.addArrangedSubview(pairView)
+        
         tradeStackView.addArrangedSubview(tableView)
         tradeStackView.addArrangedSubview(runButton)
         
@@ -75,6 +114,25 @@ private extension TradeViewController {
         searchbarProfileBtn.tintColor = .lightGray
         searchbarSearchBtn.translatesAutoresizingMaskIntoConstraints = false
         searchbarProfileBtn.translatesAutoresizingMaskIntoConstraints = false
+    }
+    
+    func setupPairView() {
+        pairView.axis = .horizontal
+        pairView.spacing = 8
+        pairView.alignment = .center
+        pairView.backgroundColor = .secondarySystemBackground
+        pairView.layer.cornerRadius = 12
+        pairView.layoutMargins = UIEdgeInsets(top: 8, left: 12, bottom: 8, right: 12)
+        pairView.isLayoutMarginsRelativeArrangement = true
+        
+        firstCurrencyLabel.font = .boldSystemFont(ofSize: 16)
+        secondCurrencyLabel.font = .boldSystemFont(ofSize: 16)
+        
+        pairView.addArrangedSubview(firstCurrencyLabel)
+        pairView.addArrangedSubview(secondCurrencyLabel)
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(pairTapped))
+        pairView.addGestureRecognizer(tap)
     }
     
     func setupTabelView() {
@@ -164,5 +222,32 @@ private extension TradeViewController {
         
         tableView.reloadData()
         emptyLabel.isHidden = !data.isEmpty
+    }
+    
+    func updatePairUI() {
+        firstCurrencyLabel.text = dataProvider.selectedFirst?.code ?? "-"
+        secondCurrencyLabel.text = dataProvider.selectedSecond?.code ?? "-"
+    }
+    
+    func resetTrading() {
+        data.removeAll()
+        tableView.reloadData()
+        emptyLabel.isHidden = false
+    }
+    
+    @objc func pairTapped() {
+        let vc = CurrenciesViewController()
+        vc.title = "Select currency"
+        let nav = UINavigationController(rootViewController: vc)
+        nav.modalPresentationStyle = .pageSheet
+        present(nav, animated: true)
+    }
+    
+    @objc func resetTapped() {
+        resetTrading()
+    }
+    
+    @objc func randomTapped() {
+        dataProvider.selectRandomPair()
     }
 }

@@ -31,7 +31,7 @@ final class CurrenciesViewController: UIViewController{
     private let emptyLabel = UILabel()
     
     // MARK: - Data
-    private let dataProvider = CurrenciesDataProviderService()
+    private let dataProvider = CurrenciesDataProviderService.shared
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -213,7 +213,8 @@ extension CurrenciesViewController: FavoritesViewDelegate{
 
 private extension CurrenciesViewController {
     func setupDataProviders() {
-        dataProvider.onCurrencyChange = { [weak self] in
+        //dataProvider.onCurrencyChange = { [weak self] in
+        dataProvider.addObserver { [weak self] in
             DispatchQueue.main.async {
                 self?.updateUI()
                 self?.collectionView.reloadData()

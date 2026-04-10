@@ -37,9 +37,11 @@ final class CurrenciesDataProviderService: NSObject, CurrencyCellDelegate {
     private var secondsLeft: Int = .zero
     private var favorites: Set<String> = []
     private var currentFilteredIndex: Int = .zero
+    private var observers: [() -> Void] = []
+    
+    static let shared = CurrenciesDataProviderService()
     
     var selectingSide: SelectedSide = .first
-    var onCurrencyChange: (() -> Void)?
     var isFavoritesEnabled: Bool = false
     
     override init() {
@@ -51,6 +53,14 @@ final class CurrenciesDataProviderService: NSObject, CurrencyCellDelegate {
     }
     
     // MARK: - Data Manipulation
+    
+}
+
+private extension CurrenciesDataProviderService {
+    func notifyObservers() {
+        observers.forEach { $0() }
+    }
+    
     func generateCurrencies() {
         let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         currencies.removeAll()
@@ -62,11 +72,26 @@ final class CurrenciesDataProviderService: NSObject, CurrencyCellDelegate {
         }
     }
     
-    func applyFilter(filterIndex: Int) {
-        currentFilteredIndex = filterIndex
-        applyCurrentFilters()
+    func selectCurrency(_ currency: Currency) {
+        guard let first = selectedFirst, let second = selectedSecond else { return }
+        guard currency.code != first.code && currency.code != second.code else { return }
+        
+        if selectingSide == .first {
+            selectedFirst = currency
+        } else {
+            selectedSecond = currency
+        }
+        
+        updateRate()
+        notifyObservers()
     }
     
+    func updateRate() {
+        rate = Double.random(in: 0.001...1000)
+    }
+}
+
+extension CurrenciesDataProviderService {
     func applyCurrentFilters() {
         var result = currencies
         switch currentFilteredIndex {
@@ -84,22 +109,9 @@ final class CurrenciesDataProviderService: NSObject, CurrencyCellDelegate {
         filteredCurrencies = result
     }
     
-    func selectCurrency(_ currency: Currency) {
-        guard let first = selectedFirst, let second = selectedSecond else { return }
-        guard currency.code != first.code && currency.code != second.code else { return }
-        
-        if selectingSide == .first {
-            selectedFirst = currency
-        } else {
-            selectedSecond = currency
-        }
-        
-        updateRate()
-        onCurrencyChange?()
-    }
-    
-    func updateRate() {
-        rate = Double.random(in: 0.001...1000)
+    func applyFilter(filterIndex: Int) {
+        currentFilteredIndex = filterIndex
+        applyCurrentFilters()
     }
     
     func calculateResult(amount: Double) -> Double {
@@ -126,6 +138,21 @@ final class CurrenciesDataProviderService: NSObject, CurrencyCellDelegate {
     func stopTimer() {
         timer?.invalidate()
         timer = nil
+    }
+    
+    func addObserver(_ observer: @escaping () -> Void) {
+        observers.append(observer)
+    }
+    
+    func selectRandomPair() {
+        guard currencies.count >= 2 else { return }
+        
+        let shuffled = currencies.shuffled()
+        selectedFirst = shuffled[0]
+        selectedSecond = shuffled[1]
+        
+        updateRate()
+        notifyObservers()
     }
 }
 
@@ -168,6 +195,6 @@ extension CurrenciesDataProviderService: UICollisionBehaviorDelegate {
             favorites.insert(code)
         }
         applyCurrentFilters()
-        onCurrencyChange?()
+        notifyObservers()
     }
 }
