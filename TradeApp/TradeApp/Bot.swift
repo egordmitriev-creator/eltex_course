@@ -8,12 +8,12 @@
 import Foundation
 import UIKit
 
-// MARK: Собственная функция для форматирования цены
+// MARK: Formatted price func
 func formattedPrice(_ price: Double) -> String {
     return String(format: "%.2f", price)
 }
 
-// MARK: Перечисление для типа позиции
+// MARK: Position types
 enum PositionTypes: String {
     case buy = "Buy"
     case sell = "Sell"
@@ -31,14 +31,13 @@ enum PositionTypes: String {
     }
 }
 
-// MARK: Перечисление для типа решения
 enum DecisionTypes: String {
     case buy = "Buy"
     case sell = "Sell"
     case ignore = "Ignore"
 }
 
-// MARK: Структура для сделки
+// MARK: Trade struct
 struct Trade {
     let type: PositionTypes
     let entryPrice: Double
@@ -51,7 +50,7 @@ struct Trade {
         case .sell:
             return entryPrice - exitPrice
         case .none:
-            return 0.0
+            return .zero
         }
     }
     
@@ -60,7 +59,6 @@ struct Trade {
     }
 }
 
-// MARK: Протокол для класса бота
 protocol AICurrencyBotProtocol {
     var currency: String { get }
     var balance: Double { get }
@@ -69,27 +67,24 @@ protocol AICurrencyBotProtocol {
     func startTrading() -> [TradeMessage]
 }
 
-// MARK: Основной класс бота
+// MARK: Bot class
 final class AICurrencyBot: AICurrencyBotProtocol {
     let currency: String
     let minPrice: Double
     let maxPrice: Double
         
-    // Приватные свойства
     private var iterations: Int
     private var currentPrice: Double = .zero
     private var entryPrice: Double = .zero
     private var positionType: PositionTypes = .none
     private var decisionType: DecisionTypes = .ignore
     private var income: Double = .zero
-    //private var outString = ""
     
     private var messages: [TradeMessage] = []
     
     private(set) var balance: Double
     private(set) var isPositionOpen: Bool = false
 
-    // Инициализатор
     init(
         initialBalance: Double = 1000.0,
         iterations: Int = 20,
@@ -104,7 +99,6 @@ final class AICurrencyBot: AICurrencyBotProtocol {
         self.maxPrice = maxPrice
     }
         
-    // Публичный метод для запуска торговли
     func startTrading() -> [TradeMessage] {
         messages.removeAll()
         
@@ -151,7 +145,6 @@ final class AICurrencyBot: AICurrencyBotProtocol {
         return messages
     }
         
-    // Приватный метод для одного цикла торговли
     private func performTradingCycle() {
         currentPrice = Double.random(in: minPrice...maxPrice)
         decisionType = .ignore

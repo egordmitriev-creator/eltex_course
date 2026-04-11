@@ -11,7 +11,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		825A9FB32F6BA3B2009AF0AB /* Exceptions for "TradeApp" folder in "TradeApp" target */ = {
+		82E253DA2F7E584D00030D1C /* Exceptions for "TradeApp" folder in "TradeApp" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -24,7 +24,7 @@
 		825A9FA32F6BA3B0009AF0AB /* TradeApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				825A9FB32F6BA3B2009AF0AB /* Exceptions for "TradeApp" folder in "TradeApp" target */,
+				82E253DA2F7E584D00030D1C /* Exceptions for "TradeApp" folder in "TradeApp" target */,
 			);
 			path = TradeApp;
 			sourceTree = "<group>";
