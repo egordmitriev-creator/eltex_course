@@ -16,13 +16,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
         window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = createRootViewController()
+        window?.rootViewController = createSplashController()
         
         window?.makeKeyAndVisible()
     }
 }
 
-private extension SceneDelegate {
+extension SceneDelegate {
+    func createSplashController() -> UIViewController {
+        return SplashScreenViewController()
+    }
+    
     func createRootViewController() -> UITabBarController {
         let tabBarController = UITabBarController()
         
