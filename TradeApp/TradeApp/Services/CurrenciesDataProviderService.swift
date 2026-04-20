@@ -179,11 +179,32 @@ extension CurrenciesDataProviderService: UICollectionViewDataSource, UICollectio
         return cell
     }
     
+
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let currency = filteredCurrencies[indexPath.row]
+        
+        let oldFirst = selectedFirst
+        let oldSecond = selectedSecond
+        
         selectCurrency(currency)
         
-        collectionView.reloadData()
+        if let cell = collectionView.cellForItem(at: indexPath) as? CurrencyCell {
+            cell.animateSelection()
+        }
+        
+        var indexPathsToReload: [IndexPath] = [indexPath]
+        
+        if let oldFirst = oldFirst,
+           let index = filteredCurrencies.firstIndex(where: { $0.code == oldFirst.code }) {
+            indexPathsToReload.append(IndexPath(row: index, section: 0))
+        }
+        
+        if let oldSecond = oldSecond,
+           let index = filteredCurrencies.firstIndex(where: { $0.code == oldSecond.code }) {
+            indexPathsToReload.append(IndexPath(row: index, section: 0))
+        }
+        
+        collectionView.reloadItems(at: indexPathsToReload)
     }
 }
 
