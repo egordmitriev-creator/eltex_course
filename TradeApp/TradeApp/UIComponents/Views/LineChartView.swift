@@ -16,6 +16,8 @@ final class LineChartView: UIView {
     private let pointLayer = CAShapeLayer()
     private let priceIndicatorLabel = UILabel()
     
+    private let pulseLayer = CAShapeLayer()
+    
     private var priceLabels: [UILabel] = []
     
     private var maxPrice: Double = .zero
@@ -40,6 +42,8 @@ final class LineChartView: UIView {
         super.layoutSubviews()
         drawChart()
         drawGrid(max: maxPrice, min: minPrice)
+        
+        drawLastPointPulse()
     }
 }
 
@@ -56,6 +60,7 @@ private extension LineChartView {
         layer.addSublayer(shapeLayer)
         layer.addSublayer(indicatorLayer)
         layer.addSublayer(pointLayer)
+        layer.addSublayer(pulseLayer)
     }
 
     func setupViews() {
@@ -79,8 +84,8 @@ private extension LineChartView {
         
         let path = UIBezierPath()
         
-        let maxPrice = prices.max() ?? 0
-        let minPrice = prices.min() ?? 0
+        maxPrice = prices.max() ?? 0
+        minPrice = prices.min() ?? 0
         let range = maxPrice - minPrice == 0 ? 1 : maxPrice - minPrice
         
         let stepX = bounds.width / CGFloat(prices.count - 1)
@@ -101,6 +106,8 @@ private extension LineChartView {
         }
         
         shapeLayer.path = path.cgPath
+        
+        drawLastPointPulse()
     }
     
     func drawGrid(max: Double, min: Double) {
@@ -124,7 +131,6 @@ private extension LineChartView {
             path.move(to: CGPoint(x: 0, y: y))
             path.addLine(to: CGPoint(x: bounds.width, y: y))
             
-            // label
             let label = UILabel()
             label.font = .systemFont(ofSize: 10)
             label.textColor = .gray
@@ -197,5 +203,54 @@ private extension LineChartView {
             x: min(x + 5, bounds.width - priceIndicatorLabel.frame.width),
             y: max(y - 20, 0)
         )
+    }
+}
+
+
+//MARK: Animation
+private extension LineChartView {
+    func drawLastPointPulse() {
+        guard let lastPrice = prices.last, prices.count > 1 else { return }
+        
+        let range = maxPrice - minPrice == 0 ? 1 : maxPrice - minPrice
+        
+        let stepX = bounds.width / CGFloat(prices.count - 1)
+        
+        let x = CGFloat(prices.count - 1) * stepX
+        let y = bounds.height * (1 - CGFloat((lastPrice - minPrice) / range))
+        
+        pulseLayer.removeAllAnimations()
+        
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        
+        let path = UIBezierPath(
+            arcCenter: CGPoint(x: x, y: y),
+            radius: 6,
+            startAngle: 0,
+            endAngle: .pi * 2,
+            clockwise: true
+        )
+        
+        pulseLayer.path = path.cgPath
+        pulseLayer.fillColor = UIColor.systemBlue.cgColor
+        
+        CATransaction.commit()
+        
+        addPulseAnimation()
+    }
+    
+    func addPulseAnimation() {
+        pulseLayer.removeAllAnimations()
+        
+        let opacity = CABasicAnimation(keyPath: "opacity")
+        opacity.fromValue = 1
+        opacity.toValue = 0.5
+        opacity.duration = 0.8
+        opacity.autoreverses = true
+        opacity.repeatCount = .infinity
+        opacity.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        
+        pulseLayer.add(opacity, forKey: "pulseOpacity")
     }
 }
