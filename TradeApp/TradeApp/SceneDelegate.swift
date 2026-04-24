@@ -19,7 +19,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
         let window = UIWindow(windowScene: windowScene)
-            let currenciesVC = CurrenciesViewController()  // ваш новый экран
+            let currenciesVC = CurrenciesViewController()
             window.rootViewController = UINavigationController(rootViewController: currenciesVC)
             self.window = window
             window.makeKeyAndVisible()
