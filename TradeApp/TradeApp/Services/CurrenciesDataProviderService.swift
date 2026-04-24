@@ -31,12 +31,11 @@ final class CurrenciesDataProviderService: NSObject, CurrencyCellDelegate {
     private(set) var filteredCurrencies: [Currency] = []
     private(set) var selectedFirst: Currency?
     private(set) var selectedSecond: Currency?
+    
     private(set) var rate: Double = .zero
     
     private var timer: Timer?
     private var secondsLeft: Int = .zero
-    private var favorites: Set<String> = []
-    private var currentFilteredIndex: Int = .zero
     
     var selectingSide: SelectedSide = .first
     var onCurrencyChange: (() -> Void)?
@@ -49,8 +48,10 @@ final class CurrenciesDataProviderService: NSObject, CurrencyCellDelegate {
         selectedSecond = currencies[1]
         applyFilter(filterIndex: 0)
     }
-    
-    // MARK: - Data Manipulation
+}
+
+// MARK: - Data Manipulation
+extension CurrenciesDataProviderService {
     func generateCurrencies() {
         let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         currencies.removeAll()
@@ -105,8 +106,10 @@ final class CurrenciesDataProviderService: NSObject, CurrencyCellDelegate {
     func calculateResult(amount: Double) -> Double {
         return amount * rate
     }
-    
-    // MARK: - Timer
+}
+
+// MARK: - Timer
+extension CurrenciesDataProviderService {
     func startTimer(update: @escaping (Int) -> Void, onRateUpdate: @escaping () -> Void) {
         timer?.invalidate()
         secondsLeft = 5

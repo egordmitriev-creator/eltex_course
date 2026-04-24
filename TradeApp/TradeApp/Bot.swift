@@ -8,10 +8,12 @@
 import Foundation
 import UIKit
 
+// MARK: Formatted price func
 func formattedPrice(_ price: Double) -> String {
     return String(format: "%.2f", price)
 }
 
+// MARK: Position types
 enum PositionTypes: String {
     case buy = "Buy"
     case sell = "Sell"
@@ -35,6 +37,7 @@ enum DecisionTypes: String {
     case ignore = "Ignore"
 }
 
+// MARK: Trade struct
 struct Trade {
     let type: PositionTypes
     let entryPrice: Double
@@ -47,7 +50,7 @@ struct Trade {
         case .sell:
             return entryPrice - exitPrice
         case .none:
-            return 0.0
+            return .zero
         }
     }
     
@@ -64,7 +67,7 @@ protocol AICurrencyBotProtocol {
     func startTrading() -> [TradeMessage]
 }
 
-// MARK: Main class
+// MARK: Bot class
 final class AICurrencyBot: AICurrencyBotProtocol {
     let currency: String
     let minPrice: Double
@@ -141,7 +144,7 @@ final class AICurrencyBot: AICurrencyBotProtocol {
         
         return messages
     }
-    
+        
     private func performTradingCycle() {
         currentPrice = Double.random(in: minPrice...maxPrice)
         decisionType = .ignore
