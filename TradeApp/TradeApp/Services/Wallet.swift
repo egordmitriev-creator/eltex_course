@@ -30,10 +30,10 @@ final class Wallet {
             if newValue <= 0 {
                 let refill = 1000.0
                 self.credit[currency, default: 0] += refill
-                self.balances[currency, default: 0] += refill
+                self.balances[currency, default: 0] = refill
+            } else {
+                self.balances[currency, default: 0] = newValue
             }
-            
-            self.balances[currency, default: 0] = newValue
         }
     }
     

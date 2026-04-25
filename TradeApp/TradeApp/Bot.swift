@@ -60,7 +60,7 @@ protocol AICurrencyBotProtocol {
     var name: String { get }
     var pair: String { get }
     
-    func runDay(wallet: Wallet) -> DailyBotReport
+    func runDay(wallet: Wallet, day: Int) -> DailyBotReport
 }
 
 // MARK: Main class
@@ -73,8 +73,7 @@ final class AICurrencyBot: AICurrencyBotProtocol {
         self.pair = pair
     }
     
-    func runDay(wallet: Wallet) -> DailyBotReport {
-        
+    func runDay(wallet: Wallet, day: Int) -> DailyBotReport {
         let operations = Int.random(
             in: BotConfig.minOperationsPerDay...BotConfig.maxOperationsPerDay
         )
@@ -83,28 +82,33 @@ final class AICurrencyBot: AICurrencyBotProtocol {
         let base = currencies[0]
         let quote = currencies[1]
         
-        var income: Double = 0
+        let startSnapshot = wallet.snapshot()
         
-        for _ in 0..<operations {
-            
+        DispatchQueue.concurrentPerform(iterations: operations) { _ in
             let price = Double.random(in: 10...100)
             let isBuy = Bool.random()
             
             if isBuy {
                 wallet.updateBalance(currency: base, delta: -1)
                 wallet.updateBalance(currency: quote, delta: price)
-                income += price
             } else {
                 wallet.updateBalance(currency: base, delta: 1)
                 wallet.updateBalance(currency: quote, delta: -price)
-                income -= price
             }
+        }
+        
+        let endSnapshot = wallet.snapshot()
+        
+        var income: Double = 0
+        for (currency, startValue) in startSnapshot {
+            let endValue = endSnapshot[currency] ?? 0
+            income += endValue - startValue
         }
         
         return DailyBotReport(
             botName: name,
             pair: pair,
-            day: BotConfig.tradingDays,
+            day: day,
             income: income
         )
     }

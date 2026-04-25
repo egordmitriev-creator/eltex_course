@@ -31,26 +31,33 @@ final class BotManager {
     }
     
     func runAllBots() -> [DailyBotReport] {
+        var allResults: [DailyBotReport] = []
         
-        let group = DispatchGroup()
-        var results: [DailyBotReport] = []
-        let resultQueue = DispatchQueue(label: "result.queue")
-        
-        for bot in bots {
-            group.enter()
+        for day in 1...BotConfig.tradingDays {
             
-            DispatchQueue.global(qos: .userInitiated).async {
-                let report = bot.runDay(wallet: self.wallet)
+            let group = DispatchGroup()
+            var results: [DailyBotReport] = []
+            let resultQueue = DispatchQueue(label: "result.queue")
+            
+            for bot in bots {
+                group.enter()
                 
-                resultQueue.async {
-                    results.append(report)
-                    group.leave()
+                DispatchQueue.global(qos: .userInitiated).async {
+                    
+                    let report = bot.runDay(wallet: self.wallet, day: day)
+                    
+                    resultQueue.async {
+                        results.append(report)
+                        group.leave()
+                    }
                 }
             }
+            
+            group.wait()
+            allResults.append(contentsOf: results)
         }
         
-        group.wait()
-        return results
+        return allResults
     }
     
     func getWalletSnapshot() -> [String: Double] {
