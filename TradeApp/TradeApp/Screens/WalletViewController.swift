@@ -11,9 +11,9 @@ import UIKit
 import UIKit
 
 final class WalletViewController: UIViewController {
-    
     private let tableView = UITableView()
-    private var data: [(String, Double)] = []
+    private var balanceData: [(String, Double)] = []
+    private var creditData: [(String, Double)] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -50,8 +50,14 @@ final class WalletViewController: UIViewController {
     }
     
     private func reloadData() {
-        let snapshot = BotManager.shared.getWalletSnapshot()
-        data = snapshot.map { ($0.key, $0.value) }
+        let wallet = BotManager.shared.wallet
+        
+        let snapshot = wallet.snapshot()
+        let credit = wallet.creditInfo()
+        
+        balanceData = snapshot.map { ($0.key, $0.value) }
+        creditData = credit.map { ($0.key, $0.value) }
+        
         tableView.reloadData()
     }
     
@@ -61,9 +67,15 @@ final class WalletViewController: UIViewController {
 }
 
 extension WalletViewController: UITableViewDataSource {
-    
+    func numberOfSections(in tableView: UITableView) -> Int {
+        2
+    }
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        data.count
+        switch section {
+        case 0: return balanceData.count
+        default: return creditData.count
+        }
     }
     
     func tableView(_ tableView: UITableView,
@@ -71,10 +83,25 @@ extension WalletViewController: UITableViewDataSource {
         
         let cell = UITableViewCell(style: .value1, reuseIdentifier: nil)
         
-        let item = data[indexPath.row]
-        cell.textLabel?.text = item.0
-        cell.detailTextLabel?.text = String(format: "%.2f", item.1)
+        switch indexPath.section {
+        case 0:
+            let item = balanceData[indexPath.row]
+            cell.textLabel?.text = "Balance: \(item.0)"
+            cell.detailTextLabel?.text = String(format: "%.2f", item.1)
+            
+        default:
+            let item = creditData[indexPath.row]
+            cell.textLabel?.text = "Credit: \(item.0)"
+            cell.detailTextLabel?.text = String(format: "%.2f", item.1)
+        }
         
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        switch section {
+        case 0: return "Balances"
+        default: return "Credit (refill history)"
+        }
     }
 }
