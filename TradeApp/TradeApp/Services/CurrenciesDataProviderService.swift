@@ -51,9 +51,6 @@ final class CurrenciesDataProviderService: NSObject, CurrencyCellDelegate {
         selectedSecond = currencies[1]
         applyFilter(filterIndex: 0)
     }
-    
-    // MARK: - Data Manipulation
-    
 }
 
 private extension CurrenciesDataProviderService {

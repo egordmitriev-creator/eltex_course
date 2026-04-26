@@ -9,7 +9,6 @@ import Foundation
 import UIKit
 
 final class SplashScreenViewController: UIViewController {
-    
     private let logoImageView = UIImageView(image: UIImage(named: "logo"))
     
     override func viewDidLoad() {
@@ -39,14 +38,12 @@ private extension SplashScreenViewController {
     }
     
     func startAnimation() {
-        // вращение
         let rotation = CABasicAnimation(keyPath: "transform.rotation")
         rotation.toValue = CGFloat.pi * 2
         rotation.duration = 1
         rotation.repeatCount = .infinity
         logoImageView.layer.add(rotation, forKey: "rotation")
         
-        // пульсация alpha
         UIView.animate(withDuration: 0.8,
                        delay: 0,
                        options: [.autoreverse, .repeat],

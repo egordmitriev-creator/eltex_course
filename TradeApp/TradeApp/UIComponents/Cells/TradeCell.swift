@@ -13,6 +13,7 @@ struct TradeMessage {
     let text: String
     let tradeType: DecisionTypes
     let details: String?
+    let color: UIColor
 }
 
 final class TradeCell: UITableViewCell {
@@ -44,16 +45,8 @@ private extension TradeCell {
     func updateUI() {
         guard let currentMessage else { return }
         mainLabel.text = currentMessage.text
-        
         // colors
-        switch currentMessage.tradeType {
-        case .buy:
-            mainLabel.textColor = .systemGreen
-        case .sell:
-            mainLabel.textColor = .systemRed
-        case .ignore:
-            mainLabel.textColor = .systemYellow
-        }
+        mainLabel.textColor = currentMessage.color
         
         if let details = currentMessage.details {
             detailsLabel.isHidden = false

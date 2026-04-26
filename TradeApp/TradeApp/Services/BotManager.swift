@@ -20,7 +20,7 @@ final class BotManager {
             "USD": 10000,
             "BTC": 10,
             "ETH": 100,
-            "RUB": 1_000_000
+            "RUB": 1000000
         ])
     }
     

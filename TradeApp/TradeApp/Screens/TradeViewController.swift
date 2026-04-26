@@ -235,11 +235,24 @@ private extension TradeViewController {
         let results = BotManager.shared.runAllBots()
         
         data = results.map {
-            TradeMessage(
+            let income = $0.income
+            
+            let color: UIColor = {
+                if income > 0 {
+                    return .systemGreen
+                } else if income < 0 {
+                    return .systemRed
+                } else {
+                    return .label
+                }
+            }()
+            
+            return TradeMessage(
                 id: UUID(),
-                text: "\($0.botName) (\($0.pair)), day = \($0.day), income = \(String(format: "%.2f", $0.income))",
+                text: "\($0.botName) (\($0.pair)), day = \($0.day), income = \(String(format: "%.2f", income))",
                 tradeType: .ignore,
-                details: nil
+                details: nil,
+                color: color
             )
         }
         
@@ -295,5 +308,6 @@ private extension TradeViewController {
         let vc = WalletViewController()
         let nav = UINavigationController(rootViewController: vc)
         nav.modalPresentationStyle = .fullScreen
-        present(nav, animated: true)    }
+        present(nav, animated: true)
+    }
 }
