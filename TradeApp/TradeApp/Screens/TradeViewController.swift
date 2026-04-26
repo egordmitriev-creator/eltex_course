@@ -250,7 +250,6 @@ private extension TradeViewController {
             return TradeMessage(
                 id: UUID(),
                 text: "\($0.botName) (\($0.pair)), day = \($0.day), income = \(String(format: "%.2f", income))",
-                tradeType: .ignore,
                 details: nil,
                 color: color
             )

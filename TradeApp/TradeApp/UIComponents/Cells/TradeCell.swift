@@ -11,7 +11,6 @@ import UIKit
 struct TradeMessage {
     let id: UUID
     let text: String
-    let tradeType: DecisionTypes
     let details: String?
     let color: UIColor
 }
