@@ -23,7 +23,7 @@ final class CurrenciesViewController: UIViewController {
     private let firstCurrencyBtn = UIButton()
     private let secondCurrencyBtn = UIButton()
     private let rateLabel = UILabel()
-    private let filterSegment = UISegmentedControl(items: ["Все", "Фиат", "Крипта"])
+    private let filterSegment = UISegmentedControl(items: ["Все", "Фиат", "Крипта", "API"])
     private let inputField = UITextField()
     private let resultLabel = UILabel()
     private let timerLabel = UILabel()
@@ -150,7 +150,15 @@ private extension CurrenciesViewController {
     }
     
     @objc func filterChanged() {
-        dataProvider.applyFilter(filterIndex: filterSegment.selectedSegmentIndex)
+        let index = filterSegment.selectedSegmentIndex
+        
+        if index == 3 {
+            dataProvider.setAPIMode(true)
+        } else {
+            dataProvider.setAPIMode(false)
+            dataProvider.applyFilter(filterIndex: index)
+        }
+        
         collectionView.reloadData()
     }
     

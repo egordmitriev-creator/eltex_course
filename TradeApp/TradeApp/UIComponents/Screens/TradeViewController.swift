@@ -82,8 +82,15 @@ private extension TradeViewController {
             action: #selector(openWallet)
         )
         
-        navigationItem.leftBarButtonItem = resetButton
-        navigationItem.rightBarButtonItems = [walletButton, randomButton]
+        let p2pButton = UIBarButtonItem(
+            image: UIImage(systemName: "arrow.left.arrow.right"),
+            style: .plain,
+            target: self,
+            action: #selector(openP2P)
+        )
+        
+        navigationItem.leftBarButtonItems = [resetButton, randomButton]
+        navigationItem.rightBarButtonItems = [walletButton, p2pButton]
     }
     
     func setupSubviews() {
@@ -305,6 +312,13 @@ private extension TradeViewController {
 private extension TradeViewController {
     @objc func openWallet() {
         let vc = WalletViewController()
+        let nav = UINavigationController(rootViewController: vc)
+        nav.modalPresentationStyle = .fullScreen
+        present(nav, animated: true)
+    }
+    
+    @objc func openP2P() {
+        let vc = P2PViewController()
         let nav = UINavigationController(rootViewController: vc)
         nav.modalPresentationStyle = .fullScreen
         present(nav, animated: true)
