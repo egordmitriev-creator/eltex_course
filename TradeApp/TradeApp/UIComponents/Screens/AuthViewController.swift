@@ -18,6 +18,10 @@ final class AuthViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tap.cancelsTouchesInView = false
+        view.addGestureRecognizer(tap)
+        
         view.backgroundColor = .systemBackground
         title = "Auth"
         
@@ -40,7 +44,7 @@ private extension AuthViewController {
         }
         
         actionButton.setTitle("Вперед", for: .normal)
-        actionButton.backgroundColor = .systemBlue
+        actionButton.backgroundColor = .systemRed
         actionButton.layer.cornerRadius = 8
         
         modeSwitch.selectedSegmentIndex = 0
@@ -133,6 +137,10 @@ private extension AuthViewController {
     func goToApp() {
         let scene = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate
         scene?.switchToMain()
+    }
+    
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
     }
 }
 

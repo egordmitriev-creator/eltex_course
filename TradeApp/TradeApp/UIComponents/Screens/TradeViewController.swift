@@ -163,7 +163,7 @@ private extension TradeViewController {
         runButton.translatesAutoresizingMaskIntoConstraints = false
         runButton.backgroundColor = .systemRed
         runButton.setTitle("RUN!!!", for: .normal)
-        runButton.setTitleColor(.black, for: .normal)
+//        runButton.setTitleColor(.black, for: .normal)
         runButton.layer.cornerRadius = 16
         runButton.setContentHuggingPriority(.required, for: .vertical)
         runButton.addTarget(self, action: #selector(handleButtonTapped), for: .touchUpInside)
