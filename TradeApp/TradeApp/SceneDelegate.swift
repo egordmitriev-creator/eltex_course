@@ -12,12 +12,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 
 
-    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+    func scene(_ scene: UIScene,
+               willConnectTo session: UISceneSession,
+               options connectionOptions: UIScene.ConnectionOptions) {
+
         guard let windowScene = (scene as? UIWindowScene) else { return }
-        
+
         window = UIWindow(windowScene: windowScene)
         window?.rootViewController = createSplashController()
-        
         window?.makeKeyAndVisible()
     }
 }
@@ -49,8 +51,27 @@ extension SceneDelegate {
         chartNavigationController.tabBarItem = UITabBarItem(title: "chart", image: UIImage(systemName: "chart.bar.xaxis"), tag: 2)
         
         
-        tabBarController.viewControllers = [tradeNavigationController, currenciesNavigationController, chartNavigationController]
+        let settingsVC = SettingsViewController()
+        let settingsNav = UINavigationController(rootViewController: settingsVC)
+        settingsNav.tabBarItem = UITabBarItem(title: "Settings", image: UIImage(systemName: "gear"), tag: 3)
+
+        tabBarController.viewControllers = [
+            tradeNavigationController,
+            currenciesNavigationController,
+            chartNavigationController,
+            settingsNav
+        ]
         
         return tabBarController
+    }
+}
+
+extension SceneDelegate {
+    func switchToMain() {
+        window?.rootViewController = createRootViewController()
+    }
+
+    func switchToAuth() {
+        window?.rootViewController = UINavigationController(rootViewController: AuthViewController())
     }
 }
