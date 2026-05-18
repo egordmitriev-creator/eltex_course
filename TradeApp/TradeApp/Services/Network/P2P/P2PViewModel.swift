@@ -24,13 +24,13 @@ final class P2PViewModel {
 
    private let fetchOffersUseCase: FetchOffersUseCaseProtocol
    private let executeTradeUseCase: ExecuteTradeUseCaseProtocol
-   private let dataProvider: CurrenciesDataProviderService
+   private let dataProvider: CurrenciesDataProviderProtocol
 
    // MARK: - Init
    init(
        fetchOffersUseCase: FetchOffersUseCaseProtocol = FetchOffersUseCase(),
        executeTradeUseCase: ExecuteTradeUseCaseProtocol = ExecuteTradeUseCase(),
-       dataProvider: CurrenciesDataProviderService = .shared
+       dataProvider: CurrenciesDataProviderProtocol =  CurrenciesDataProviderService.shared
    ) {
        self.fetchOffersUseCase = fetchOffersUseCase
        self.executeTradeUseCase = executeTradeUseCase

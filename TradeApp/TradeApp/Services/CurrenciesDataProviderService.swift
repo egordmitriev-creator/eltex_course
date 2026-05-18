@@ -285,3 +285,10 @@ extension CurrenciesDataProviderService {
         notifyObservers()
     }
 }
+
+protocol CurrenciesDataProviderProtocol: AnyObject {
+    var selectedFirst: Currency? { get }
+    var selectedSecond: Currency? { get }
+    func addObserver(_ observer: @escaping () -> Void)
+}
+extension CurrenciesDataProviderService: CurrenciesDataProviderProtocol {}

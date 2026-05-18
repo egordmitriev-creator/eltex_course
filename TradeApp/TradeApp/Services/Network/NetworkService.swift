@@ -68,3 +68,15 @@ final class NetworkService {
         }
     }
 }
+
+extension NetworkError: Equatable {
+    public static func == (lhs: NetworkError, rhs: NetworkError) -> Bool {
+        switch (lhs, rhs) {
+        case (.noInternet, .noInternet),
+             (.parsingError, .parsingError),
+             (.unauthorized, .unauthorized),
+             (.unknown, .unknown): return true
+        default: return false
+        }
+    }
+}
