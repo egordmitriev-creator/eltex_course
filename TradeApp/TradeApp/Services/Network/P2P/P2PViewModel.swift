@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+internal import os
 
 final class P2PViewModel {
    // MARK: - Bindings
@@ -37,19 +38,29 @@ final class P2PViewModel {
        self.dataProvider = dataProvider
 
        dataProvider.addObserver { [weak self] in
-           DispatchQueue.main.async { self?.loadOffers() }
+           DispatchQueue.main.async {
+               AppLogger.p2p.debug("Currency pair changed — reloading offers")
+               self?.loadOffers()
+           }
        }
    }
 
    // MARK: - Public interface
    func viewDidLoad() {
+       AppLogger.p2p.info("P2P screen opened (pair: \(self.pairDescription))")
        loadOffers()
    }
 
    func didSelectOffer(at index: Int, amountText: String?) {
-       guard case .loaded(let offers) = state else { return }
+       guard case .loaded(let offers) = state else {
+           AppLogger.p2p.warning("didSelectOffer — called while state is not .loaded, ignoring")
+           return
+       }
 
        let offerVM = offers[index]
+       let amount = amountText ?? ""
+       
+       AppLogger.p2p.info("Trade initiated — seller: \(offerVM.sellerName), amount: \(amount) \(self.dataProvider.selectedFirst?.code ?? "?"), rate: \(offerVM.rate, format: .fixed(precision: 6))")
 
        let input = TradeInput(
            amountText: amountText ?? "",
@@ -66,18 +77,27 @@ final class P2PViewModel {
            DispatchQueue.main.async {
                switch result {
                case .success:
+                   AppLogger.p2p.info("Trade succeeded — wallet updated (seller: \(offerVM.sellerName))")
                    self?.onWalletUpdated?(self?.walletText ?? "")
+
                case .failure(let error):
-                   self?.onTradeError?(self?.tradeErrorMessage(for: error) ?? "Ошибка")
+                   let message = self?.tradeErrorMessage(for: error) ?? "Ошибка"
+                   AppLogger.p2p.error("Trade failed — \(error.logDescription) (seller: \(offerVM.sellerName), amount: \(amount))")
+                   self?.onTradeError?(message)
                }
            }
        }
    }
 
    func didTapSellerInfo(at index: Int) {
-       guard case .loaded(let offers) = state else { return }
+       guard case .loaded(let offers) = state else {
+           AppLogger.p2p.warning("didTapSellerInfo — called while state is not .loaded, ignoring")
+           return
+       }
+        
        let offerVM = offers[index]
-
+       AppLogger.p2p.debug("Opening seller detail (seller: \(offerVM.sellerName))")
+        
        let detailVM = SellerDetailViewModel(
            sellerName: offerVM.sellerName,
            rate: offerVM.rate,
@@ -92,6 +112,7 @@ final class P2PViewModel {
    }
 
    func didTapBack() {
+       AppLogger.p2p.debug("User tapped back — dismissing P2P screen")
        coordinator?.dismiss()
    }
 
@@ -108,18 +129,28 @@ final class P2PViewModel {
        let base = dataProvider.selectedFirst?.code ?? ""
        let target = dataProvider.selectedSecond?.code ?? ""
 
+       guard !base.isEmpty, !target.isEmpty else {
+           AppLogger.p2p.error("loadOffers — currency pair is incomplete (base: '\(base)', target: '\(target)')")
+           state = .error("Выберите валютную пару")
+           return
+       }
+
+       AppLogger.p2p.debug("loadOffers — fetching offers (pair: \(base)/\(target))")
        state = .loading
 
        fetchOffersUseCase.execute(base: base, target: target) { [weak self] result in
            DispatchQueue.main.async {
                switch result {
                case .success(let offers):
+                   AppLogger.p2p.info("loadOffers — \(offers.count) offers received (pair: \(base)/\(target))")
                    let viewModels = offers.map { P2POfferViewModel(offer: $0) }
                    self?.state = .loaded(viewModels)
                    self?.onWalletUpdated?(self?.walletText ?? "")
 
                case .failure(let error):
-                   self?.state = .error(self?.networkErrorMessage(for: error) ?? "Ошибка")
+                   let message = self?.networkErrorMessage(for: error) ?? "Ошибка"
+                   AppLogger.p2p.error("loadOffers — failed: \(error.logDescription) (pair: \(base)/\(target))")
+                   self?.state = .error(message)
                }
            }
        }
@@ -150,5 +181,34 @@ final class P2PViewModel {
    private func randomDate() -> Date {
        let daysAgo = Int.random(in: 30...1000)
        return Calendar.current.date(byAdding: .day, value: -daysAgo, to: Date()) ?? Date()
+   }
+
+    private var pairDescription: String {
+        let first  = dataProvider.selectedFirst?.code  ?? "?"
+        let second = dataProvider.selectedSecond?.code ?? "?"
+        return "\(first)/\(second)"
+    }
+}
+
+// MARK: - Log description helpers
+private extension TradeError {
+    var logDescription: String {
+        switch self {
+        case .invalidAmount:                  return "invalid amount"
+        case .amountNotPositive:               return "amount not positive"
+        case .insufficientFunds(let a):         return "insufficient funds (available: \(String(format: "%.2f", a)))"
+        case .networkError(let e):             return "network error — \(e.logDescription)"
+        }
+    }
+}
+
+private extension NetworkError {
+    var logDescription: String {
+        switch self {
+        case .noInternet:   return "no internet"
+        case .parsingError: return "parsing error"
+        case .unauthorized: return "unauthorized"
+        case .unknown:     return "unknown"
+      }
    }
 }
