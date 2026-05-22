@@ -25,22 +25,24 @@ enum SelectedSide {
 }
 
 // MARK: - Data Provider
-final class CurrenciesDataProviderService: NSObject {
-    
+final class CurrenciesDataProviderService: NSObject, CurrencyCellDelegate {
     // MARK: - Properties
     private(set) var currencies: [Currency] = []
     private(set) var filteredCurrencies: [Currency] = []
-    
     private(set) var selectedFirst: Currency?
     private(set) var selectedSecond: Currency?
-    
     private(set) var rate: Double = .zero
     
     private var timer: Timer?
     private var secondsLeft: Int = .zero
+    private var favorites: Set<String> = []
+    private var currentFilteredIndex: Int = .zero
+    private var observers: [() -> Void] = []
+    
+    static let shared = CurrenciesDataProviderService()
     
     var selectingSide: SelectedSide = .first
-    var onCurrencyChange: (() -> Void)?
+    var isFavoritesEnabled: Bool = false
     
     override init() {
         super.init()
@@ -49,10 +51,16 @@ final class CurrenciesDataProviderService: NSObject {
         selectedSecond = currencies[1]
         applyFilter(filterIndex: 0)
     }
+    
+    // MARK: - Data Manipulation
+    
 }
 
-// MARK: - Data Manipulation
-extension CurrenciesDataProviderService {
+private extension CurrenciesDataProviderService {
+    func notifyObservers() {
+        observers.forEach { $0() }
+    }
+    
     func generateCurrencies() {
         let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         currencies.removeAll()
@@ -64,15 +72,36 @@ extension CurrenciesDataProviderService {
         }
     }
     
-    func applyFilter(filterIndex: Int) {
-        switch filterIndex {
+    func updateRate() {
+        rate = Double.random(in: 0.001...1000)
+    }
+}
+
+extension CurrenciesDataProviderService {
+    func applyCurrentFilters() {
+        var result = currencies
+        switch currentFilteredIndex {
         case 1:
-            filteredCurrencies = currencies.filter { $0.type == .fiat }
+            result = result.filter { $0.type == .fiat }
         case 2:
-            filteredCurrencies = currencies.filter { $0.type == .crypto }
+            result = result.filter { $0.type == .crypto }
         default:
-            filteredCurrencies = currencies
+            break
         }
+        
+        if isFavoritesEnabled {
+            result = result.filter { favorites.contains($0.code) }
+        }
+        filteredCurrencies = result
+    }
+    
+    func applyFilter(filterIndex: Int) {
+        currentFilteredIndex = filterIndex
+        applyCurrentFilters()
+    }
+    
+    func calculateResult(amount: Double) -> Double {
+        return amount * rate
     }
     
     func selectCurrency(_ currency: Currency) {
@@ -86,15 +115,7 @@ extension CurrenciesDataProviderService {
         }
         
         updateRate()
-        onCurrencyChange?()
-    }
-    
-    func updateRate() {
-        rate = Double.random(in: 0.001...1000)
-    }
-    
-    func calculateResult(amount: Double) -> Double {
-        return amount * rate
+        notifyObservers()
     }
 }
 
@@ -120,6 +141,21 @@ extension CurrenciesDataProviderService {
         timer?.invalidate()
         timer = nil
     }
+    
+    func addObserver(_ observer: @escaping () -> Void) {
+        observers.append(observer)
+    }
+    
+    func selectRandomPair() {
+        guard currencies.count >= 2 else { return }
+        
+        let shuffled = currencies.shuffled()
+        selectedFirst = shuffled[0]
+        selectedSecond = shuffled[1]
+        
+        updateRate()
+        notifyObservers()
+    }
 }
 
 // MARK: - Collection View
@@ -136,7 +172,12 @@ extension CurrenciesDataProviderService: UICollectionViewDataSource, UICollectio
         
         let disabled = (selectedFirst?.code == item.code) || (selectedSecond?.code == item.code)
         
-        cell.update(code: item.code, disabled: disabled)
+        cell.delegate = self
+        cell.update(
+            code: item.code,
+            disabled: disabled,
+            isFavorite: favorites.contains(item.code)
+        )
         return cell
     }
     
@@ -145,5 +186,17 @@ extension CurrenciesDataProviderService: UICollectionViewDataSource, UICollectio
         selectCurrency(currency)
         
         collectionView.reloadData()
+    }
+}
+
+extension CurrenciesDataProviderService: UICollisionBehaviorDelegate {
+    func didTapFavorite(code: String) {
+        if favorites.contains(code) {
+            favorites.remove(code)
+        } else {
+            favorites.insert(code)
+        }
+        applyCurrentFilters()
+        notifyObservers()
     }
 }

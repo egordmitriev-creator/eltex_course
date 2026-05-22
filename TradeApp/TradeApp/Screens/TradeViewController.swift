@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  TradeViewController.swift
 //  TradeApp
 //
 //  Created by egor_dmitriev on 19.03.2026.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class ViewController: UIViewController {
+final class TradeViewController: UIViewController {
     private let tradeStackView = UIStackView()
     private let searchbarStackView = UIStackView()
     private let searchbarTextField = UITextField()
@@ -17,6 +17,12 @@ final class ViewController: UIViewController {
     private let emptyLabel = UILabel()
     private let tableView: UITableView = UITableView()
     
+    private let pairView = UIStackView()
+    private let firstCurrencyLabel = UILabel()
+    private let secondCurrencyLabel = UILabel()
+    
+    private let dataProvider = CurrenciesDataProviderService.shared
+    
     private var data: [TradeMessage] = []
     
     override func viewDidLoad() {
@@ -24,20 +30,50 @@ final class ViewController: UIViewController {
         
         setupViews()
         setupConstraints()
+        updatePairUI()
+        
+        dataProvider.addObserver { [weak self] in
+            DispatchQueue.main.async {
+                self?.updatePairUI()
+                self?.resetTrading()
+            }
+        }
     }
 }
 
 // MARK: - Setup
-private extension ViewController {
+private extension TradeViewController {
     func setupViews() {
         view.backgroundColor = .systemBackground
         
         setupTradeStackView()
         setupSearchBar()
+        setupPairView()
         setupTabelView()
         setupRunButton()
         setupEmptyLabel()
         setupSubviews()
+        setupNavigationBar()
+    }
+    
+    func setupNavigationBar() {
+    let resetButton = UIBarButtonItem(
+            image: UIImage(systemName: "trash"),
+            style: .plain,
+            target: self,
+            action: #selector(resetTapped)
+        )
+        
+
+        let randomButton = UIBarButtonItem(
+            image: UIImage(systemName: "shuffle"),
+            style: .plain,
+            target: self,
+            action: #selector(randomTapped)
+        )
+        
+        navigationItem.leftBarButtonItem = resetButton
+        navigationItem.rightBarButtonItem = randomButton
     }
     
     func setupSubviews() {
@@ -45,6 +81,9 @@ private extension ViewController {
         view.addSubview(emptyLabel)
         
         tradeStackView.addArrangedSubview(searchbarStackView)
+        
+        tradeStackView.addArrangedSubview(pairView)
+        
         tradeStackView.addArrangedSubview(tableView)
         tradeStackView.addArrangedSubview(runButton)
         
@@ -77,6 +116,25 @@ private extension ViewController {
         searchbarProfileBtn.translatesAutoresizingMaskIntoConstraints = false
     }
     
+    func setupPairView() {
+        pairView.axis = .horizontal
+        pairView.spacing = 8
+        pairView.alignment = .center
+        pairView.backgroundColor = .secondarySystemBackground
+        pairView.layer.cornerRadius = 12
+        pairView.layoutMargins = UIEdgeInsets(top: 8, left: 12, bottom: 8, right: 12)
+        pairView.isLayoutMarginsRelativeArrangement = true
+        
+        firstCurrencyLabel.font = .boldSystemFont(ofSize: 16)
+        secondCurrencyLabel.font = .boldSystemFont(ofSize: 16)
+        
+        pairView.addArrangedSubview(firstCurrencyLabel)
+        pairView.addArrangedSubview(secondCurrencyLabel)
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(pairTapped))
+        pairView.addGestureRecognizer(tap)
+    }
+    
     func setupTabelView() {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.register(TradeCell.self, forCellReuseIdentifier: TradeCell.identifier)
@@ -103,7 +161,7 @@ private extension ViewController {
     }
 }
 
-extension ViewController: UITableViewDataSource {
+extension TradeViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         data.count
     }
@@ -117,7 +175,7 @@ extension ViewController: UITableViewDataSource {
 }
 
 // MARK: - Constraints
-private extension ViewController {
+private extension TradeViewController {
     func setupConstraints() {
         let constraints = [
             // tradeStackView
@@ -146,7 +204,7 @@ private extension ViewController {
 }
 
 // MARK: - Logic
-private extension ViewController {
+private extension TradeViewController {
     @objc func handleButtonTapped() {
         runBot()
     }
@@ -164,5 +222,34 @@ private extension ViewController {
         
         tableView.reloadData()
         emptyLabel.isHidden = !data.isEmpty
+    }
+    
+    func updatePairUI() {
+        firstCurrencyLabel.text = dataProvider.selectedFirst?.code ?? "-"
+        secondCurrencyLabel.text = dataProvider.selectedSecond?.code ?? "-"
+    }
+    
+    func resetTrading() {
+        data.removeAll()
+        tableView.reloadData()
+        emptyLabel.isHidden = false
+    }
+    
+    @objc func pairTapped() {
+        let vc = CurrenciesDetailViewController()
+        vc.title = "Select currency"
+        
+        let nav = UINavigationController(rootViewController: vc)
+        nav.modalPresentationStyle = .pageSheet
+        
+        present(nav, animated: true)
+    }
+    
+    @objc func resetTapped() {
+        resetTrading()
+    }
+    
+    @objc func randomTapped() {
+        dataProvider.selectRandomPair()
     }
 }

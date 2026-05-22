@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class CurrenciesViewController: UIViewController {
+final class CurrenciesViewController: UIViewController{
     // MARK: - UI
     private let layout: UICollectionViewLayout = {
         let layout = UICollectionViewFlowLayout()
@@ -27,9 +27,11 @@ final class CurrenciesViewController: UIViewController {
     private let inputField = UITextField()
     private let resultLabel = UILabel()
     private let timerLabel = UILabel()
+    private let favoritesView = FavoritesView()
+    private let emptyLabel = UILabel()
     
     // MARK: - Data
-    private let dataProvider = CurrenciesDataProviderService()
+    private let dataProvider = CurrenciesDataProviderService.shared
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,12 +40,7 @@ final class CurrenciesViewController: UIViewController {
         setutSubviews()
         setupConstraints()
         
-        dataProvider.onCurrencyChange = { [weak self] in
-            DispatchQueue.main.async {
-                self?.updateUI()
-                self?.collectionView.reloadData()
-            }
-        }
+        setupDataProviders()
         
         let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         tap.cancelsTouchesInView = false
@@ -82,10 +79,16 @@ private extension CurrenciesViewController {
         inputField.addTarget(self, action: #selector(amountChanged), for: .editingChanged)
         resultLabel.text = "0"
         timerLabel.textAlignment = .center
+        
+        favoritesView.delegate = self
+        
+        emptyLabel.text = "Нет избранных валют"
+        emptyLabel.textAlignment = .center
+        emptyLabel.isHidden = true
     }
     
     func setutSubviews() {
-        [curencyButtonsStack, rateLabel, filterSegment, collectionView, inputField, resultLabel, timerLabel].forEach {
+        [curencyButtonsStack, rateLabel, filterSegment, collectionView, inputField, resultLabel, timerLabel, favoritesView, emptyLabel].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
         }
@@ -95,13 +98,12 @@ private extension CurrenciesViewController {
     
     func setupConstraints() {
         NSLayoutConstraint.activate([
-            curencyButtonsStack.topAnchor.constraint(equalTo: view.topAnchor, constant: 40),
+            curencyButtonsStack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
             curencyButtonsStack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
             rateLabel.topAnchor.constraint(equalTo: curencyButtonsStack.bottomAnchor, constant: 8),
             rateLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
-            filterSegment.topAnchor.constraint(equalTo: rateLabel.bottomAnchor, constant: 8),
             filterSegment.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             filterSegment.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             
@@ -118,7 +120,17 @@ private extension CurrenciesViewController {
             collectionView.topAnchor.constraint(equalTo: timerLabel.bottomAnchor, constant: 8),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
+            favoritesView.topAnchor.constraint(equalTo: rateLabel.bottomAnchor, constant: 8),
+            favoritesView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            favoritesView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            favoritesView.heightAnchor.constraint(equalToConstant: 40),
+
+            filterSegment.topAnchor.constraint(equalTo: favoritesView.bottomAnchor, constant: 8),
+            
+            emptyLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            emptyLabel.centerYAnchor.constraint(equalTo: collectionView.centerYAnchor)
         ])
         
         firstCurrencyBtn.heightAnchor.constraint(equalToConstant: 60).isActive = true
@@ -162,6 +174,9 @@ private extension CurrenciesViewController {
         firstCurrencyBtn.setTitleColor(dataProvider.selectingSide == .first ? .systemBlue : .label, for: .normal)
         secondCurrencyBtn.setTitleColor(dataProvider.selectingSide == .second ? .systemBlue : .label, for: .normal)
         updateRateLabel()
+        
+        emptyLabel.isHidden = !dataProvider.filteredCurrencies.isEmpty
+        collectionView.isHidden = dataProvider.filteredCurrencies.isEmpty
     }
     
     func updateRateLabel() {
@@ -192,5 +207,25 @@ private extension CurrenciesViewController {
     
     @objc func dismissKeyboard() {
         view.endEditing(true)
+    }
+}
+
+extension CurrenciesViewController: FavoritesViewDelegate{
+    func didToggleFavorite(isOn: Bool) {
+        dataProvider.isFavoritesEnabled = isOn
+        dataProvider.applyCurrentFilters()
+        collectionView.reloadData()
+    }
+}
+
+
+private extension CurrenciesViewController {
+    func setupDataProviders() {
+        dataProvider.addObserver { [weak self] in
+            DispatchQueue.main.async {
+                self?.updateUI()
+                self?.collectionView.reloadData()
+            }
+        }
     }
 }

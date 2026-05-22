@@ -8,8 +8,17 @@
 import Foundation
 import UIKit
 
+// MARK: - Delegate
+protocol CurrencyCellDelegate: AnyObject {
+    func didTapFavorite(code: String)
+}
+
 final class CurrencyCell: UICollectionViewCell {
     private let currencyLabel: UILabel = UILabel()
+    private let favoriteButton: UIButton = UIButton()
+    
+    weak var delegate: CurrencyCellDelegate?
+    private var code: String = ""
     
     override init(frame: CGRect) {
         super.init(frame: .zero)
@@ -27,27 +36,49 @@ final class CurrencyCell: UICollectionViewCell {
 private extension CurrencyCell {
     func setupSubview() {
         contentView.addSubview(currencyLabel)
+        contentView.addSubview(favoriteButton)
     }
     
     func setupConstraints() {
         currencyLabel.translatesAutoresizingMaskIntoConstraints = false
+        favoriteButton.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
             currencyLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            currencyLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
+            currencyLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            
+            favoriteButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 2),
+            favoriteButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -2),
+            favoriteButton.widthAnchor.constraint(equalToConstant: 16),
+            favoriteButton.heightAnchor.constraint(equalToConstant: 16)
         ])
     }
 
     func setupUI() {
         contentView.layer.cornerRadius = 8
         contentView.backgroundColor = .secondarySystemBackground
+        
+        favoriteButton.setImage(UIImage(systemName: "star"), for: .normal)
+        favoriteButton.tintColor = .systemGray
+        favoriteButton.addTarget(self, action: #selector(favoriteTapped), for: .touchUpInside)
+    }
+    
+    @objc func favoriteTapped() {
+        delegate?.didTapFavorite(code: code)
     }
 }
 
 extension CurrencyCell {
     static let identifier = "CurrencyCell"
     
-    func update(code: String, disabled: Bool) {
+    func update(code: String, disabled: Bool, isFavorite: Bool) {
+        self.code = code
         currencyLabel.text = code
+        
+        let imageName = isFavorite ? "star.fill" : "star"
+        favoriteButton.setImage(UIImage(systemName: imageName), for: .normal)
+        favoriteButton.tintColor = isFavorite ? .systemYellow: .systemGray
+        
         currencyLabel.textColor = disabled ? .gray : .label
         contentView.alpha = disabled ? 0.5 : 1
     }
