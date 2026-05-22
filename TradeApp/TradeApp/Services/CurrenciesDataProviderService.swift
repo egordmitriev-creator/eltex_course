@@ -31,15 +31,11 @@ final class CurrenciesDataProviderService: NSObject, CurrencyCellDelegate {
     private(set) var filteredCurrencies: [Currency] = []
     private(set) var selectedFirst: Currency?
     private(set) var selectedSecond: Currency?
+    
     private(set) var rate: Double = .zero
     
     private var timer: Timer?
     private var secondsLeft: Int = .zero
-    private var favorites: Set<String> = []
-    private var currentFilteredIndex: Int = .zero
-    private var observers: [() -> Void] = []
-    
-    static let shared = CurrenciesDataProviderService()
     
     var selectingSide: SelectedSide = .first
     var isFavoritesEnabled: Bool = false
@@ -189,7 +185,7 @@ extension CurrenciesDataProviderService: UICollectionViewDataSource, UICollectio
     }
 }
 
-extension CurrenciesDataProviderService: UICollisionBehaviorDelegate {
+extension CurrenciesDataProviderService {
     func didTapFavorite(code: String) {
         if favorites.contains(code) {
             favorites.remove(code)
