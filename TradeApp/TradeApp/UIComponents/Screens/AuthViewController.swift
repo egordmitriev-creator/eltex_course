@@ -8,6 +8,8 @@
 import Foundation
 import UIKit
 import Combine
+import SwiftUI
+internal import os
 
 final class AuthViewController: UIViewController {
     private let logoImageView = UIImageView(image: UIImage(named: "logo"))
@@ -15,6 +17,7 @@ final class AuthViewController: UIViewController {
     private let passwordField = UITextField()
     private let actionButton = UIButton()
     private let modeSwitch = UISegmentedControl(items: ["Вход", "Регистрация"])
+    private let troubleButton = UIButton(type: .system)
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -58,17 +61,33 @@ private extension AuthViewController {
         actionButton.isEnabled = false
         actionButton.alpha = 0.5
         
+        // «Не получается войти?»
+        var config = UIButton.Configuration.plain()
+        config.title = "Не получается войти?"
+        config.baseForegroundColor = .systemRed
+        config.attributedTitle = AttributedString(
+            "Не получается войти?",
+            attributes: AttributeContainer([
+                .font: UIFont.systemFont(ofSize: 14),
+                .foregroundColor: UIColor.systemRed
+            ])
+        )
+        troubleButton.configuration = config
+        troubleButton.addTarget(self, action: #selector(troubleTapped), for: .touchUpInside)
+        
         let stack = UIStackView(arrangedSubviews: [
             logoImageView,
             loginField,
             passwordField,
             actionButton,
-            modeSwitch
+            modeSwitch,
+            troubleButton
         ])
         
         stack.alignment = .fill
         stack.axis = .vertical
         stack.spacing = 12
+        stack.setCustomSpacing(4, after: modeSwitch)
         
         stack.translatesAutoresizingMaskIntoConstraints = false
         
@@ -88,35 +107,20 @@ private extension AuthViewController {
 // MARK: - Logic
 private extension AuthViewController {
     func validate(login: String?, password: String?) -> AuthValidationError? {
-        guard let login, !login.isEmpty else {
-            return .emptyLogin
-        }
-        
-        guard let password, !password.isEmpty else {
-            return .emptyPassword
-        }
-        
-        guard login.count >= 4 else {
-            return .shortLogin
-        }
-        
-        guard password.count >= 6 else {
-            return .shortPassword
-        }
+        guard let login, !login.isEmpty else { return .emptyLogin }
+        guard let password, !password.isEmpty else { return .emptyPassword }
+        guard login.count >= 4 else { return .shortLogin }
+        guard password.count >= 6 else { return .shortPassword }
         
         let regex = "^[a-zA-Z0-9]+$"
         let predicate = NSPredicate(format: "SELF MATCHES %@", regex)
-        
-        guard predicate.evaluate(with: login) else {
-            return .invalidLoginFormat
-        }
+        guard predicate.evaluate(with: login) else { return .invalidLoginFormat }
         
         return nil
     }
     
     @objc func actionTapped() {
-        let error = validate(login: loginField.text,
-                             password: passwordField.text)
+        let error = validate(login: loginField.text, password: passwordField.text)
         
         if let error {
             showError(error.rawValue)
@@ -132,7 +136,6 @@ private extension AuthViewController {
             goToApp()
         } else {
             let success = AuthService.shared.login(login: login, password: password)
-            
             if success {
                 goToApp()
             } else {
@@ -141,12 +144,21 @@ private extension AuthViewController {
         }
     }
     
+    @objc func troubleTapped() {
+        AppLogger.auth.debug("User tapped 'trouble signing in' — opening feedback form")
+        
+        // Оборачиваем SwiftUI-экран в UIHostingController и пушим в NavigationController
+        let feedbackVC = UIHostingController(rootView: FeedbackView())
+        feedbackVC.title = "Обратная связь"
+        navigationController?.pushViewController(feedbackVC, animated: true)
+    }
+    
     func goToApp() {
         let scene = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate
         scene?.switchToMain()
     }
     
-    @objc private func dismissKeyboard() {
+    @objc func dismissKeyboard() {
         view.endEditing(true)
     }
 }
@@ -154,11 +166,11 @@ private extension AuthViewController {
 // MARK: - Errors
 private extension AuthViewController {
     enum AuthValidationError: String {
-        case emptyLogin = "Введите логин"
-        case emptyPassword = "Введите пароль"
-        case shortLogin = "Логин должен быть минимум 4 символа"
-        case shortPassword = "Пароль должен быть минимум 6 символов"
-        case invalidLoginFormat = "Логин может содержать только буквы и цифры"
+        case emptyLogin          = "Введите логин"
+        case emptyPassword       = "Введите пароль"
+        case shortLogin          = "Логин должен быть минимум 4 символа"
+        case shortPassword       = "Пароль должен быть минимум 6 символов"
+        case invalidLoginFormat  = "Логин может содержать только буквы и цифры"
     }
     
     func showError(_ message: String) {
@@ -167,9 +179,7 @@ private extension AuthViewController {
             message: message,
             preferredStyle: .alert
         )
-        
         alert.addAction(UIAlertAction(title: "ОК", style: .default))
-        
         present(alert, animated: true)
     }
 }

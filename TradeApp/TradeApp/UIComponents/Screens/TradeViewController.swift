@@ -91,8 +91,16 @@ private extension TradeViewController {
             action: #selector(openP2P)
         )
         
-        navigationItem.leftBarButtonItems = [resetButton, randomButton]
-        navigationItem.rightBarButtonItems = [walletButton, p2pButton]
+        // heatmap button
+        let heatmapButton = UIBarButtonItem(
+            image: UIImage(systemName: "square.grid.3x3.fill"),
+            style: .plain,
+            target: self,
+            action: #selector(openHeatmap)
+        )
+        
+        navigationItem.leftBarButtonItems  = [resetButton, randomButton]
+        navigationItem.rightBarButtonItems = [walletButton, p2pButton, heatmapButton]
     }
     
     func setupSubviews() {
@@ -179,6 +187,7 @@ private extension TradeViewController {
     }
 }
 
+// MARK: - TableView
 extension TradeViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         data.count
@@ -195,37 +204,28 @@ extension TradeViewController: UITableViewDataSource {
 // MARK: - Constraints
 private extension TradeViewController {
     func setupConstraints() {
-        let constraints = [
-            // tradeStackView
-            NSLayoutConstraint(item: tradeStackView, attribute: .top, relatedBy: .equal, toItem: view.safeAreaLayoutGuide, attribute: .top, multiplier: 1, constant: 8),
-            NSLayoutConstraint(item: tradeStackView, attribute: .leading, relatedBy: .equal, toItem: view, attribute: .leading, multiplier: 1, constant: 16),
-            NSLayoutConstraint(item: tradeStackView, attribute: .trailing, relatedBy: .equal, toItem: view, attribute: .trailing, multiplier: 1, constant: -16),
-            NSLayoutConstraint(item: tradeStackView, attribute: .bottom, relatedBy: .equal, toItem: view.safeAreaLayoutGuide, attribute: .bottom, multiplier: 1, constant: -8),
+        NSLayoutConstraint.activate([
+            tradeStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            tradeStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            tradeStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            tradeStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8),
             
-            // searchbar height
-            NSLayoutConstraint(item: searchbarStackView, attribute: .height, relatedBy: .greaterThanOrEqual, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 60),
+            searchbarStackView.heightAnchor.constraint(greaterThanOrEqualToConstant: 60),
             
-            // searchbar buttons
-            NSLayoutConstraint(item: searchbarSearchBtn, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 30),
-            NSLayoutConstraint(item: searchbarProfileBtn, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 30),
+            searchbarSearchBtn.widthAnchor.constraint(equalToConstant: 30),
+            searchbarProfileBtn.widthAnchor.constraint(equalToConstant: 30),
             
-            // run button height
-            NSLayoutConstraint(item: runButton, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 32),
+            runButton.heightAnchor.constraint(equalToConstant: 32),
             
-            // emptyLabel
-            NSLayoutConstraint(item: emptyLabel, attribute: .centerX, relatedBy: .equal, toItem: view, attribute: .centerX, multiplier: 1, constant: 0),
-            NSLayoutConstraint(item: emptyLabel, attribute: .centerY, relatedBy: .equal, toItem: view, attribute: .centerY, multiplier: 1, constant: 0)
-        ]
-        
-        NSLayoutConstraint.activate(constraints)
+            emptyLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            emptyLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
     }
 }
 
 // MARK: - Logic
 private extension TradeViewController {
-    @objc func handleButtonTapped() {
-        runBot()
-    }
+    @objc func handleButtonTapped() { runBot() }
     
     func runBot() {
         if !botsCreated {
@@ -244,17 +244,7 @@ private extension TradeViewController {
         
         data = results.map {
             let income = $0.income
-            
-            let color: UIColor = {
-                if income > 0 {
-                    return .systemGreen
-                } else if income < 0 {
-                    return .systemRed
-                } else {
-                    return .label
-                }
-            }()
-            
+            let color: UIColor = income > 0 ? .systemGreen : income < 0 ? .systemRed : .label
             return TradeMessage(
                 id: UUID(),
                 text: "\($0.botName) (\($0.pair)), day = \($0.day), income = \(String(format: "%.2f", income))",
@@ -268,7 +258,7 @@ private extension TradeViewController {
     }
     
     func updatePairUI() {
-        firstCurrencyLabel.text = dataProvider.selectedFirst?.code ?? "-"
+        firstCurrencyLabel.text  = dataProvider.selectedFirst?.code  ?? "-"
         secondCurrencyLabel.text = dataProvider.selectedSecond?.code ?? "-"
     }
     
@@ -288,29 +278,9 @@ private extension TradeViewController {
         present(nav, animated: true)
     }
     
-    @objc func resetTapped() {
-        resetTrading()
-    }
+    @objc func resetTapped()  { resetTrading() }
+    @objc func randomTapped() { dataProvider.selectRandomPair() }
     
-    @objc func randomTapped() {
-        dataProvider.selectRandomPair()
-    }
-}
-
-private extension TradeViewController {
-    func setupSwipe() {
-        let swipe = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipeUp))
-        swipe.direction = .up
-        
-        view.addGestureRecognizer(swipe)
-    }
-    
-    @objc private func handleSwipeUp() {
-        tabBarController?.selectedIndex = 2
-    }
-}
-
-private extension TradeViewController {
     @objc func openWallet() {
         let vc = WalletViewController()
         let nav = UINavigationController(rootViewController: vc)
@@ -323,5 +293,22 @@ private extension TradeViewController {
         p2pCoordinator = coordinator
         let nav = coordinator.start()
         present(nav, animated: true)
+    }
+    
+    @objc func openHeatmap() {
+        navigationController?.pushViewController(HeatmapViewController(), animated: true)
+    }
+}
+
+// MARK: - Swipe
+private extension TradeViewController {
+    func setupSwipe() {
+        let swipe = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipeUp))
+        swipe.direction = .up
+        view.addGestureRecognizer(swipe)
+    }
+    
+    @objc func handleSwipeUp() {
+        tabBarController?.selectedIndex = 2
     }
 }
