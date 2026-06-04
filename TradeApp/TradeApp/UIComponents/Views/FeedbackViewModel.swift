@@ -25,6 +25,7 @@ final class FeedbackViewModel: ObservableObject {
    @Published var authorName: String = ""
    @Published var messageText: String = ""
    @Published var isConsentChecked: Bool = false
+   @Published private(set) var selectedTopicIDs: Set<String> = []
  
    // MARK: - UI State
    @Published var showConsent: Bool = false
@@ -87,10 +88,15 @@ final class FeedbackViewModel: ObservableObject {
       authorName = ""
       messageText = ""
       isConsentChecked = false
+      selectedTopicIDs = []
       showErrors = false
       authorError = nil
       messageError = nil
       showSuccess = false
+   }
+ 
+   func updateSelectedTopics(_ ids: Set<String>) {
+      selectedTopicIDs = ids
    }
  
    // MARK: - Private validation
@@ -115,4 +121,3 @@ final class FeedbackViewModel: ObservableObject {
       return nil
    }
 }
- 

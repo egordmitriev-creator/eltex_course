@@ -42,6 +42,7 @@ struct FeedbackView: View {
             headerSection
             authorSection
             messageSection
+            topicPickerSection
             consentSection
             sendButton
          }
@@ -178,6 +179,19 @@ struct FeedbackView: View {
       Label(message, systemImage: "exclamationmark.circle")
          .font(.caption)
          .foregroundColor(.red)
+   }
+}
+ 
+ 
+// MARK: - FeedbackView + topicPickerSection
+private extension FeedbackView {
+   var topicPickerSection: some View {
+      FeedbackTopicPickerSwiftUIView(
+         selectedIDs: Binding(
+            get: { viewModel.selectedTopicIDs },
+            set: { viewModel.updateSelectedTopics($0) }
+         )
+      )
    }
 }
 
