@@ -18,9 +18,32 @@ enum FeedbackValidationError: String {
    case noConsent = "Необходимо согласие на обработку данных"
 }
  
+// MARK: - Alert kind
+enum FeedbackAlert: Identifiable {
+   case success
+   case botCheckFailed
+ 
+   var id: String { "\(self)" }
+ 
+   var title: String {
+      switch self {
+      case .success: return "Отправлено"
+      case .botCheckFailed: return "Проверка не пройдена"
+      }
+   }
+ 
+   var message: String {
+      switch self {
+      case .success:
+         return "Ваше обращение успешно отправлено. Мы свяжемся с вами в ближайшее время."
+      case .botCheckFailed:
+         return "Попробуйте ещё раз."
+      }
+   }
+}
+ 
 // MARK: - ViewModel
 final class FeedbackViewModel: ObservableObject {
- 
    // MARK: - Input
    @Published var authorName: String = ""
    @Published var messageText: String = ""
@@ -29,14 +52,15 @@ final class FeedbackViewModel: ObservableObject {
  
    // MARK: - UI State
    @Published var showConsent: Bool = false
-   @Published var showSuccess: Bool = false
+   @Published var showBotCheck: Bool = false
+   @Published var activeAlert: FeedbackAlert? = nil
  
-   // MARK: - Validation feedback
+   // MARK: - Validation
    @Published private(set) var authorError: String? = nil
    @Published private(set) var messageError: String? = nil
    @Published private(set) var showErrors: Bool = false
  
-   // MARK: - Derived state
+   // MARK: - Derived
    @Published private(set) var canSend: Bool = false
  
    private var cancellables = Set<AnyCancellable>()
@@ -49,24 +73,22 @@ final class FeedbackViewModel: ObservableObject {
             && !author.trimmingCharacters(in: .whitespaces).isEmpty
             && !message.trimmingCharacters(in: .whitespaces).isEmpty
          }
-         .sink { [weak self] value in
-            self?.canSend = value
-         }
+         .sink { [weak self] in self?.canSend = $0 }
          .store(in: &cancellables)
  
       $authorName
          .dropFirst()
          .combineLatest($showErrors)
-         .sink { [weak self] _, showErrors in
-            self?.authorError = showErrors ? self?.validateAuthor()?.rawValue : nil
+         .sink { [weak self] _, show in
+            self?.authorError = show ? self?.validateAuthor()?.rawValue : nil
          }
          .store(in: &cancellables)
  
       $messageText
          .dropFirst()
          .combineLatest($showErrors)
-         .sink { [weak self] _, showErrors in
-            self?.messageError = showErrors ? self?.validateMessage()?.rawValue : nil
+         .sink { [weak self] _, show in
+            self?.messageError = show ? self?.validateMessage()?.rawValue : nil
          }
          .store(in: &cancellables)
    }
@@ -74,16 +96,26 @@ final class FeedbackViewModel: ObservableObject {
    // MARK: - Public interface
    func send() {
       showErrors = true
- 
       authorError = validateAuthor()?.rawValue
       messageError = validateMessage()?.rawValue
  
       guard validate() == nil else { return }
  
-      AppLogger.auth.info("Feedback submitted (author: \(self.authorName, privacy: .public))")
-      showSuccess = true
+      showBotCheck = true
    }
  
+   func botCheckPassed() {
+      showBotCheck = false
+      AppLogger.auth.info("Feedback submitted (author: \(self.authorName, privacy: .public))")
+      activeAlert = .success
+   }
+ 
+   func botCheckFailed() {
+      showBotCheck = false
+      activeAlert = .botCheckFailed
+   }
+ 
+   /// Сброс формы — вызывается после успешной отправки
    func reset() {
       authorName = ""
       messageText = ""
@@ -92,7 +124,6 @@ final class FeedbackViewModel: ObservableObject {
       showErrors = false
       authorError = nil
       messageError = nil
-      showSuccess = false
    }
  
    func updateSelectedTopics(_ ids: Set<String>) {
@@ -108,16 +139,16 @@ final class FeedbackViewModel: ObservableObject {
    }
  
    private func validateAuthor() -> FeedbackValidationError? {
-      let trimmed = authorName.trimmingCharacters(in: .whitespaces)
-      if trimmed.isEmpty { return .emptyAuthor }
-      if trimmed.count < 2 { return .shortAuthor }
+      let t = authorName.trimmingCharacters(in: .whitespaces)
+      if t.isEmpty { return .emptyAuthor }
+      if t.count < 2 { return .shortAuthor }
       return nil
    }
  
    private func validateMessage() -> FeedbackValidationError? {
-      let trimmed = messageText.trimmingCharacters(in: .whitespaces)
-      if trimmed.isEmpty { return .emptyMessage }
-      if trimmed.count < 10 { return .shortMessage }
+      let t = messageText.trimmingCharacters(in: .whitespaces)
+      if t.isEmpty { return .emptyMessage }
+      if t.count < 10 { return .shortMessage }
       return nil
    }
 }

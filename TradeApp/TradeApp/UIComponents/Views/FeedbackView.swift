@@ -10,29 +10,49 @@ import SwiftUI
 // MARK: - Main View
 struct FeedbackView: View {
    @StateObject private var viewModel = FeedbackViewModel()
-
    @Environment(\.dismiss) private var dismiss
+   @FocusState private var focusedField: FormField?
+ 
+   private enum FormField { case author, message }
 
    var body: some View {
       ZStack {
          formContent
-            .blur(radius: viewModel.showConsent ? 3 : 0)
-            .allowsHitTesting(!viewModel.showConsent)
-            .animation(.easeInOut(duration: 0.25), value: viewModel.showConsent)
-
+            .blur(radius: anyOverlayShown ? 3 : 0)
+            .allowsHitTesting(!anyOverlayShown)
+            .animation(.easeInOut(duration: 0.25), value: anyOverlayShown)
+ 
          if viewModel.showConsent {
             ConsentOverlayView(isPresented: $viewModel.showConsent)
                .transition(.opacity.combined(with: .scale(scale: 0.96)))
          }
+        
+         if viewModel.showBotCheck {
+            BotCheckView(
+               onSuccess: { viewModel.botCheckPassed() },
+               onFailure: { viewModel.botCheckFailed() }
+            )
+            .transition(.opacity.combined(with: .scale(scale: 0.96)))
+         }
       }
-      .animation(.easeInOut(duration: 0.25), value: viewModel.showConsent)
+      .animation(.easeInOut(duration: 0.25), value: anyOverlayShown)
       .navigationTitle("Обратная связь")
       .navigationBarTitleDisplayMode(.inline)
-      .alert("Отправлено", isPresented: $viewModel.showSuccess) {
-         Button("Закрыть") { dismiss() }
-      } message: {
-         Text("Ваше обращение успешно отправлено. Мы свяжемся с вами в ближайшее время.")
+      .alert(item: $viewModel.activeAlert) { alert in
+         Alert(
+            title:   Text(alert.title),
+            message: Text(alert.message),
+            dismissButton: .default(Text("OK")) {
+               if case .success = alert {
+                  viewModel.reset()
+                  dismiss()
+               }
+            }
+         )
       }
+   }
+   private var anyOverlayShown: Bool {
+      viewModel.showConsent || viewModel.showBotCheck
    }
 
    // MARK: - Form
@@ -67,21 +87,25 @@ struct FeedbackView: View {
             .font(.footnote)
             .foregroundColor(.secondary)
 
-         // $viewModel.authorName — @Binding к @Published свойству ViewModel
          TextField("Введите ваше имя", text: $viewModel.authorName)
             .textFieldStyle(.roundedBorder)
             .textContentType(.name)
             .autocorrectionDisabled()
-
+            .focused($focusedField, equals: .author)
             .overlay(
                RoundedRectangle(cornerRadius: 6)
                   .stroke(viewModel.authorError != nil ? Color.red : Color.clear, lineWidth: 1)
+                  // Анимация появления/скрытия рамки ошибки
+                  .animation(.easeInOut(duration: 0.2), value: viewModel.authorError != nil)
             )
-
+ 
+         // Анимация появления/скрытия лейбла ошибки
          if let error = viewModel.authorError {
             errorLabel(error)
+               .transition(.opacity.combined(with: .move(edge: .top)))
          }
       }
+      .animation(.easeInOut(duration: 0.25), value: viewModel.authorError)
    }
 
    private var messageSection: some View {
@@ -91,11 +115,17 @@ struct FeedbackView: View {
             .foregroundColor(.secondary)
 
          TextEditor(text: $viewModel.messageText)
+            .focused($focusedField, equals: .message)
             .frame(minHeight: 140)
             .padding(6)
             .background(
                RoundedRectangle(cornerRadius: 8)
-                  .stroke(viewModel.messageError != nil ? Color.red : Color(uiColor: .separator))
+                  .stroke(
+                     viewModel.messageError != nil
+                        ? Color.red
+                        : Color(uiColor: .separator)
+                  )
+                  .animation(.easeInOut(duration: 0.2), value: viewModel.messageError != nil)
             )
             .overlay(
                Group {
@@ -112,8 +142,10 @@ struct FeedbackView: View {
 
          if let error = viewModel.messageError {
             errorLabel(error)
+               .transition(.opacity.combined(with: .move(edge: .top)))
          }
       }
+      .animation(.easeInOut(duration: 0.25), value: viewModel.messageError)
    }
 
    private var consentSection: some View {
@@ -124,7 +156,8 @@ struct FeedbackView: View {
          )
          .foregroundColor(viewModel.isConsentChecked ? .red : .secondary)
          .font(.title3)
-         // Тап по иконке — переключает чекбокс через ViewModel
+         // Анимация переключения чекбокса
+         .animation(.spring(response: 0.3, dampingFraction: 0.6), value: viewModel.isConsentChecked)
          .onTapGesture { viewModel.isConsentChecked.toggle() }
 
          consentText
@@ -132,7 +165,10 @@ struct FeedbackView: View {
    }
 
    private var sendButton: some View {
-      Button(action: viewModel.send) {
+      Button {
+         focusedField = nil
+         viewModel.send()
+      } label: {
          HStack {
             Spacer()
             Text("Отправить")
@@ -140,13 +176,18 @@ struct FeedbackView: View {
             Spacer()
          }
          .frame(height: 48)
-         .background(viewModel.canSend ? Color.red : Color.gray.opacity(0.4))
+         // Анимация смены цвета кнопки при изменении canSend
+         .background(
+            RoundedRectangle(cornerRadius: 12)
+               .fill(viewModel.canSend ? Color.red : Color.gray.opacity(0.4))
+               .animation(.easeInOut(duration: 0.3), value: viewModel.canSend)
+         )
          .foregroundColor(.white)
-         .clipShape(RoundedRectangle(cornerRadius: 12))
+         // Анимация масштаба при нажатии
+         .scaleEffect(viewModel.canSend ? 1.0 : 0.98)
+         .animation(.easeInOut(duration: 0.2), value: viewModel.canSend)
       }
-
       .disabled(!viewModel.canSend)
-      .animation(.easeInOut(duration: 0.2), value: viewModel.canSend)
    }
 
    // MARK: - Consent text with tappable link
@@ -182,8 +223,7 @@ struct FeedbackView: View {
    }
 }
  
- 
-// MARK: - FeedbackView + topicPickerSection
+// MARK: - topicPickerSection
 private extension FeedbackView {
    var topicPickerSection: some View {
       FeedbackTopicPickerSwiftUIView(
