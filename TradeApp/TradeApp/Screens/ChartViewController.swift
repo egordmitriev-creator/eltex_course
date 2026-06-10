@@ -7,18 +7,6 @@
 
 import UIKit
 
-// MARK: Candle struct
-struct Candle {
-    let open: Double
-    let close: Double
-    let high: Double
-    let low: Double
-    
-    var isBullish: Bool {
-        close >= open
-    }
-}
-
 // MARK: Main class
 final class ChartViewController: UIViewController {
     private let layout: UICollectionViewLayout = {

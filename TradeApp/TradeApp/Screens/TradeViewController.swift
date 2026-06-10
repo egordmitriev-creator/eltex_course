@@ -25,6 +25,8 @@ final class TradeViewController: UIViewController {
     
     private var data: [TradeMessage] = []
     
+    private var botsCreated = false
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -59,14 +61,13 @@ private extension TradeViewController {
     }
     
     func setupNavigationBar() {
-    let resetButton = UIBarButtonItem(
+        let resetButton = UIBarButtonItem(
             image: UIImage(systemName: "trash"),
             style: .plain,
             target: self,
             action: #selector(resetTapped)
         )
         
-
         let randomButton = UIBarButtonItem(
             image: UIImage(systemName: "shuffle"),
             style: .plain,
@@ -74,8 +75,15 @@ private extension TradeViewController {
             action: #selector(randomTapped)
         )
         
+        let walletButton = UIBarButtonItem(
+            image: UIImage(systemName: "wallet.pass"),
+            style: .plain,
+            target: self,
+            action: #selector(openWallet)
+        )
+        
         navigationItem.leftBarButtonItem = resetButton
-        navigationItem.rightBarButtonItem = randomButton
+        navigationItem.rightBarButtonItems = [walletButton, randomButton]
     }
     
     func setupSubviews() {
@@ -212,15 +220,40 @@ private extension TradeViewController {
     }
     
     func runBot() {
-        let bot = AICurrencyBot(
-            initialBalance: 1000.0,
-            iterations: 30,
-            currency: "USD",
-            minPrice: 20.0,
-            maxPrice: 150.0
-        )
+        if !botsCreated {
+            let bot1 = AICurrencyBot(name: "BotA", pair: "BTC-USD")
+            let bot2 = AICurrencyBot(name: "BotB", pair: "RUB-ETH")
+            let bot3 = AICurrencyBot(name: "BotC", pair: "BTC-RUB")
+            
+            BotManager.shared.register(bot: bot1)
+            BotManager.shared.register(bot: bot2)
+            BotManager.shared.register(bot: bot3)
+            
+            botsCreated = true
+        }
         
-        data = bot.startTrading()
+        let results = BotManager.shared.runAllBots()
+        
+        data = results.map {
+            let income = $0.income
+            
+            let color: UIColor = {
+                if income > 0 {
+                    return .systemGreen
+                } else if income < 0 {
+                    return .systemRed
+                } else {
+                    return .label
+                }
+            }()
+            
+            return TradeMessage(
+                id: UUID(),
+                text: "\($0.botName) (\($0.pair)), day = \($0.day), income = \(String(format: "%.2f", income))",
+                details: nil,
+                color: color
+            )
+        }
         
         tableView.reloadData()
         emptyLabel.isHidden = !data.isEmpty
@@ -266,5 +299,14 @@ private extension TradeViewController {
     
     @objc private func handleSwipeUp() {
         tabBarController?.selectedIndex = 2
+    }
+}
+
+private extension TradeViewController {
+    @objc func openWallet() {
+        let vc = WalletViewController()
+        let nav = UINavigationController(rootViewController: vc)
+        nav.modalPresentationStyle = .fullScreen
+        present(nav, animated: true)
     }
 }
