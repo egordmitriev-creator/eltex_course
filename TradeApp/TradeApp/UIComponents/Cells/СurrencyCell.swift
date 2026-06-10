@@ -83,3 +83,30 @@ extension CurrencyCell {
         contentView.alpha = disabled ? 0.5 : 1
     }
 }
+
+//MARK: Animation
+extension CurrencyCell {
+    func animateSelection() {
+        // 1. scale animation
+        UIView.animate(withDuration: 0.12,
+                       animations: {
+            self.transform = CGAffineTransform(scaleX: 0.92, y: 0.92)
+        }, completion: { _ in
+            UIView.animate(withDuration: 0.12) {
+                self.transform = .identity
+            }
+        })
+        
+        // 2. background color animation
+        let originalColor = contentView.backgroundColor
+        
+        UIView.animate(withDuration: 0.25,
+                       animations: {
+            self.contentView.backgroundColor = UIColor.systemGreen.withAlphaComponent(0.3)
+        }, completion: { _ in
+            UIView.animate(withDuration: 0.25) {
+                self.contentView.backgroundColor = originalColor
+            }
+        })
+    }
+}

@@ -48,6 +48,7 @@ final class ChartViewController: UIViewController {
     private let lineChartView = LineChartView()
     
     private var candles: [Candle] = []
+    private var timer: Timer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -60,6 +61,8 @@ final class ChartViewController: UIViewController {
         chartSwitch.addTarget(self, action: #selector(chartTypeChanged), for: .valueChanged)
             
         updateChartVisibility()
+        
+        startLiveUpdates()
     }
 }
 
@@ -205,3 +208,21 @@ private extension ChartViewController {
     }
 }
 
+
+//MARK: Animation
+private extension ChartViewController {
+    func startLiveUpdates() {
+        timer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { [weak self] _ in
+            self?.addRandomPrice()
+        }
+    }
+
+    func addRandomPrice() {
+        guard let last = lineChartView.prices.last else { return }
+        
+        let change = Double.random(in: -5...5)
+        let newPrice = max(0, last + change)
+        
+        lineChartView.addNewPrice(newPrice)
+    }
+}
