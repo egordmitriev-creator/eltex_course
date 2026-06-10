@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import Combine
 
 final class AuthViewController: UIViewController {
     private let logoImageView = UIImageView(image: UIImage(named: "logo"))
@@ -15,8 +16,12 @@ final class AuthViewController: UIViewController {
     private let actionButton = UIButton()
     private let modeSwitch = UISegmentedControl(items: ["Вход", "Регистрация"])
     
+    private var cancellables = Set<AnyCancellable>()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        setupBindings()
         
         let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         tap.cancelsTouchesInView = false
@@ -50,6 +55,8 @@ private extension AuthViewController {
         modeSwitch.selectedSegmentIndex = 0
         
         actionButton.addTarget(self, action: #selector(actionTapped), for: .touchUpInside)
+        actionButton.isEnabled = false
+        actionButton.alpha = 0.5
         
         let stack = UIStackView(arrangedSubviews: [
             logoImageView,
@@ -164,5 +171,35 @@ private extension AuthViewController {
         alert.addAction(UIAlertAction(title: "ОК", style: .default))
         
         present(alert, animated: true)
+    }
+}
+
+// MARK: - Combine
+extension UITextField {
+    var textPublisher: AnyPublisher<String, Never> {
+        NotificationCenter.default.publisher(
+            for: UITextField.textDidChangeNotification,
+            object: self
+        )
+        .compactMap { ($0.object as? UITextField)?.text }
+        .eraseToAnyPublisher()
+    }
+}
+
+private extension AuthViewController {
+    func setupBindings() {
+        let loginPublisher = loginField.textPublisher
+        let passwordPublisher = passwordField.textPublisher
+        
+        Publishers.CombineLatest(loginPublisher, passwordPublisher)
+            .map { [weak self] login, password in
+                return self?.validate(login: login, password: password) == nil
+            }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isValid in
+                self?.actionButton.isEnabled = isValid
+                self?.actionButton.alpha = isValid ? 1 : 0.5
+            }
+            .store(in: &cancellables)
     }
 }
