@@ -27,6 +27,8 @@ final class TradeViewController: UIViewController {
     
     private var botsCreated = false
     
+    private var p2pCoordinator: P2PCoordinator?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -317,9 +319,9 @@ private extension TradeViewController {
     }
     
     @objc func openP2P() {
-        let vc = P2PViewController()
-        let nav = UINavigationController(rootViewController: vc)
-        nav.modalPresentationStyle = .fullScreen
+        let coordinator = P2PCoordinator(presentingViewController: self)
+        p2pCoordinator = coordinator
+        let nav = coordinator.start()
         present(nav, animated: true)
     }
 }
