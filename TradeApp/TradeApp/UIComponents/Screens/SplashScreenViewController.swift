@@ -55,11 +55,19 @@ private extension SplashScreenViewController {
     func openMainApp() {
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let sceneDelegate = windowScene.delegate as? SceneDelegate else { return }
-        
-        let main = sceneDelegate.createRootViewController()
-        
-        sceneDelegate.window?.rootViewController = main
-        
+
+        let auth = AuthService.shared
+
+        let nextVC: UIViewController
+
+        if auth.isLoggedIn && auth.isAutoLoginEnabled {
+            nextVC = sceneDelegate.createRootViewController()
+        } else {
+            nextVC = UINavigationController(rootViewController: AuthViewController())
+        }
+
+        sceneDelegate.window?.rootViewController = nextVC
+
         UIView.transition(with: sceneDelegate.window!,
                           duration: 0.5,
                           options: .transitionCrossDissolve,
