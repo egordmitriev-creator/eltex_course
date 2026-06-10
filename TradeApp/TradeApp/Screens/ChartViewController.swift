@@ -30,10 +30,22 @@ final class ChartViewController: UIViewController {
         return layout
     }()
     
+    private let chartSwitch: UISegmentedControl = {
+        let control = UISegmentedControl(
+            items: [
+                UIImage(systemName: "chart.bar.xaxis") ?? UIImage(),
+                UIImage(systemName: "chart.line.uptrend.xyaxis") ?? UIImage()
+            ]
+        )
+        control.selectedSegmentIndex = 0
+        return control
+    }()
+    
     private lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
     
     private let infoLabel = UILabel()
     private let recomendationLabel = UILabel()
+    private let lineChartView = LineChartView()
     
     private var candles: [Candle] = []
     
@@ -44,6 +56,10 @@ final class ChartViewController: UIViewController {
         setupConstraints()
         generateCandles()
         setupGestures()
+        
+        chartSwitch.addTarget(self, action: #selector(chartTypeChanged), for: .valueChanged)
+            
+        updateChartVisibility()
     }
 }
 
@@ -56,7 +72,9 @@ private extension ChartViewController {
     }
     
     func setupSubviews() {
+        view.addSubview(chartSwitch)
         view.addSubview(collectionView)
+        view.addSubview(lineChartView)
         view.addSubview(infoLabel)
         view.addSubview(recomendationLabel)
     }
@@ -65,14 +83,24 @@ private extension ChartViewController {
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         infoLabel.translatesAutoresizingMaskIntoConstraints = false
         recomendationLabel.translatesAutoresizingMaskIntoConstraints = false
+        chartSwitch.translatesAutoresizingMaskIntoConstraints = false
+        lineChartView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            chartSwitch.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            chartSwitch.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            
+            collectionView.topAnchor.constraint(equalTo: chartSwitch.bottomAnchor, constant: 8),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             collectionView.heightAnchor.constraint(equalToConstant: 200),
             
-            infoLabel.topAnchor.constraint(equalTo: collectionView.bottomAnchor, constant: 16),
+            lineChartView.topAnchor.constraint(equalTo: chartSwitch.bottomAnchor, constant: 8),
+            lineChartView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            lineChartView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            lineChartView.heightAnchor.constraint(equalToConstant: 200),
+            
+            infoLabel.topAnchor.constraint(equalTo: lineChartView.bottomAnchor, constant: 16),
             infoLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             infoLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             
@@ -108,6 +136,9 @@ private extension ChartViewController {
             
             return Candle(open: open, close: close, high: high, low: low)
         }
+        
+        let prices = candles.map { $0.close }
+        lineChartView.prices = prices
         
         collectionView.reloadData()
     }
@@ -159,3 +190,18 @@ extension ChartViewController: UICollectionViewDataSource, UICollectionViewDeleg
         """
     }
 }
+
+// MARK: func for linear chart
+private extension ChartViewController {
+    @objc private func chartTypeChanged() {
+        updateChartVisibility()
+    }
+    
+    private func updateChartVisibility() {
+        let isCandle = chartSwitch.selectedSegmentIndex == 0
+        
+        collectionView.isHidden = !isCandle
+        lineChartView.isHidden = isCandle
+    }
+}
+
