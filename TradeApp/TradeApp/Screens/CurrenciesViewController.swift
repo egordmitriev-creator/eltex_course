@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class CurrenciesViewController: UIViewController{
+final class CurrenciesViewController: UIViewController {
     // MARK: - UI
     private let layout: UICollectionViewLayout = {
         let layout = UICollectionViewFlowLayout()

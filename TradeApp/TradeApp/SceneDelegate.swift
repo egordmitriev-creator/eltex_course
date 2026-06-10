@@ -38,7 +38,14 @@ private extension SceneDelegate {
         let currenciesNavigationController = UINavigationController(rootViewController: currenciesViewController)
         currenciesNavigationController.tabBarItem = UITabBarItem(title: "currencies", image: UIImage(systemName: "creditcard.arrow.trianglehead.2.clockwise.rotate.90"), tag: 1)
         
-        tabBarController.viewControllers = [tradeNavigationController, currenciesNavigationController]
+        let chartViewController = ChartViewController()
+        chartViewController.title = "Chart"
+        
+        let chartNavigationController = UINavigationController(rootViewController: chartViewController)
+        chartNavigationController.tabBarItem = UITabBarItem(title: "chart", image: UIImage(systemName: "chart.bar.xaxis"), tag: 2)
+        
+        
+        tabBarController.viewControllers = [tradeNavigationController, currenciesNavigationController, chartNavigationController]
         
         return tabBarController
     }

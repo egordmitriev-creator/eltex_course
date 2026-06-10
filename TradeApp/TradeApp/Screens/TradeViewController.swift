@@ -32,6 +32,8 @@ final class TradeViewController: UIViewController {
         setupConstraints()
         updatePairUI()
         
+        setupSwipe()
+        
         dataProvider.addObserver { [weak self] in
             DispatchQueue.main.async {
                 self?.updatePairUI()
@@ -251,5 +253,18 @@ private extension TradeViewController {
     
     @objc func randomTapped() {
         dataProvider.selectRandomPair()
+    }
+}
+
+private extension TradeViewController {
+    func setupSwipe() {
+        let swipe = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipeUp))
+        swipe.direction = .up
+        
+        view.addGestureRecognizer(swipe)
+    }
+    
+    @objc private func handleSwipeUp() {
+        tabBarController?.selectedIndex = 2
     }
 }
