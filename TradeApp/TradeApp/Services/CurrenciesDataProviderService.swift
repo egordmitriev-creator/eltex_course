@@ -34,6 +34,9 @@ final class CurrenciesDataProviderService: NSObject, CurrencyCellDelegate {
     
     private(set) var rate: Double = .zero
     
+    private var apiCurrencies: [Currency] = []
+    private var isAPIMode: Bool = false
+    
     private var timer: Timer?
     private var secondsLeft: Int = .zero
     
@@ -42,9 +45,13 @@ final class CurrenciesDataProviderService: NSObject, CurrencyCellDelegate {
     
     override init() {
         super.init()
-        generateCurrencies()
+        //generateCurrencies()
+        loadDefaultCurrencies()
         selectedFirst = currencies[0]
         selectedSecond = currencies[1]
+        
+        loadCurrenciesFromAPI(base: selectedFirst?.code ?? "USD")
+        
         applyFilter(filterIndex: 0)
     }
 }
@@ -52,6 +59,16 @@ final class CurrenciesDataProviderService: NSObject, CurrencyCellDelegate {
 private extension CurrenciesDataProviderService {
     func notifyObservers() {
         observers.forEach { $0() }
+    }
+    
+    func loadDefaultCurrencies() {
+        currencies = [
+            Currency(code: "USD", type: .fiat),
+            Currency(code: "EUR", type: .fiat),
+            Currency(code: "RUB", type: .fiat),
+            Currency(code: "BTC", type: .crypto),
+            Currency(code: "ETH", type: .crypto)
+        ]
     }
     
     func generateCurrencies() {
@@ -72,7 +89,21 @@ private extension CurrenciesDataProviderService {
 
 extension CurrenciesDataProviderService {
     func applyCurrentFilters() {
-        var result = currencies
+        var result: [Currency]
+        
+        if isAPIMode {
+            result = apiCurrencies
+        } else {
+            result = currencies
+            
+            if !apiCurrencies.isEmpty {
+                let existingCodes = Set(result.map { $0.code })
+                
+                let newFromAPI = apiCurrencies.filter { !existingCodes.contains($0.code) }
+                result.append(contentsOf: newFromAPI)
+            }
+        }
+        
         switch currentFilteredIndex {
         case 1:
             result = result.filter { $0.type == .fiat }
@@ -85,6 +116,7 @@ extension CurrenciesDataProviderService {
         if isFavoritesEnabled {
             result = result.filter { favorites.contains($0.code) }
         }
+        
         filteredCurrencies = result
     }
     
@@ -210,6 +242,43 @@ extension CurrenciesDataProviderService {
         } else {
             favorites.insert(code)
         }
+        applyCurrentFilters()
+        notifyObservers()
+    }
+}
+
+// MARK: P2P
+extension CurrenciesDataProviderService {
+    func loadCurrenciesFromAPI(base: String) {
+        NetworkService.shared.fetchRates(base: base) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let rates):
+                    self?.apiCurrencies = rates.keys.map {
+                        Currency(code: $0, type: self?.detectType(code: $0) ?? .fiat)
+                    }
+                    self?.applyCurrentFilters()
+                    self?.notifyObservers()
+                    
+                case .failure:
+                    break
+                }
+            }
+        }
+    }
+    
+    private func detectType(code: String) -> CurrencyType {
+        let crypto = ["BTC", "ETH"]
+        return crypto.contains(code) ? .crypto : .fiat
+    }
+    
+    func setAPIMode(_ enabled: Bool) {
+        isAPIMode = enabled
+        
+        if enabled {
+            loadCurrenciesFromAPI(base: selectedFirst?.code ?? "USD")
+        }
+        
         applyCurrentFilters()
         notifyObservers()
     }
