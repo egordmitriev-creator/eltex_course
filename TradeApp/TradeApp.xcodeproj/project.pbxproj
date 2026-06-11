@@ -6,8 +6,24 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		826A0FBB2FBAEACD00264810 /* TradeAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826A0FB42FBAEACD00264810 /* TradeAppTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		826A0F9E2FBADDFA00264810 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 825A9F992F6BA3B0009AF0AB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 825A9FA02F6BA3B0009AF0AB;
+			remoteInfo = TradeApp;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		825A9FA12F6BA3B0009AF0AB /* TradeApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TradeApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		826A0F9A2FBADDFA00264810 /* TradeAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TradeAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		826A0FB42FBAEACD00264810 /* TradeAppTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TradeAppTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -29,10 +45,27 @@
 			path = TradeApp;
 			sourceTree = "<group>";
 		};
+		82ABA9E12FBB0D7C00AD147D /* Mocks */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Mocks;
+			sourceTree = "<group>";
+		};
+		82ABA9EC2FBB0E6B00AD147D /* Tests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Tests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		825A9F9E2F6BA3B0009AF0AB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		826A0F972FBADDFA00264810 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -46,6 +79,7 @@
 			isa = PBXGroup;
 			children = (
 				825A9FA32F6BA3B0009AF0AB /* TradeApp */,
+				826A0FB52FBAEACD00264810 /* TradeAppTests */,
 				825A9FA22F6BA3B0009AF0AB /* Products */,
 			);
 			sourceTree = "<group>";
@@ -54,8 +88,19 @@
 			isa = PBXGroup;
 			children = (
 				825A9FA12F6BA3B0009AF0AB /* TradeApp.app */,
+				826A0F9A2FBADDFA00264810 /* TradeAppTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		826A0FB52FBAEACD00264810 /* TradeAppTests */ = {
+			isa = PBXGroup;
+			children = (
+				82ABA9EC2FBB0E6B00AD147D /* Tests */,
+				82ABA9E12FBB0D7C00AD147D /* Mocks */,
+				826A0FB42FBAEACD00264810 /* TradeAppTests.swift */,
+			);
+			path = TradeAppTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -83,6 +128,30 @@
 			productReference = 825A9FA12F6BA3B0009AF0AB /* TradeApp.app */;
 			productType = "com.apple.product-type.application";
 		};
+		826A0F992FBADDFA00264810 /* TradeAppTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 826A0FA22FBADDFA00264810 /* Build configuration list for PBXNativeTarget "TradeAppTests" */;
+			buildPhases = (
+				826A0F962FBADDFA00264810 /* Sources */,
+				826A0F972FBADDFA00264810 /* Frameworks */,
+				826A0F982FBADDFA00264810 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				826A0F9F2FBADDFA00264810 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				82ABA9E12FBB0D7C00AD147D /* Mocks */,
+				82ABA9EC2FBB0E6B00AD147D /* Tests */,
+			);
+			name = TradeAppTests;
+			packageProductDependencies = (
+			);
+			productName = TradeAppTests;
+			productReference = 826A0F9A2FBADDFA00264810 /* TradeAppTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -95,6 +164,10 @@
 				TargetAttributes = {
 					825A9FA02F6BA3B0009AF0AB = {
 						CreatedOnToolsVersion = 26.3;
+					};
+					826A0F992FBADDFA00264810 = {
+						CreatedOnToolsVersion = 26.3;
+						TestTargetID = 825A9FA02F6BA3B0009AF0AB;
 					};
 				};
 			};
@@ -113,12 +186,20 @@
 			projectRoot = "";
 			targets = (
 				825A9FA02F6BA3B0009AF0AB /* TradeApp */,
+				826A0F992FBADDFA00264810 /* TradeAppTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		825A9F9F2F6BA3B0009AF0AB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		826A0F982FBADDFA00264810 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -135,7 +216,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		826A0F962FBADDFA00264810 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				826A0FBB2FBAEACD00264810 /* TradeAppTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		826A0F9F2FBADDFA00264810 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 825A9FA02F6BA3B0009AF0AB /* TradeApp */;
+			targetProxy = 826A0F9E2FBADDFA00264810 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		825A9FB52F6BA3B2009AF0AB /* Debug */ = {
@@ -325,6 +422,48 @@
 			};
 			name = Release;
 		};
+		826A0FA02FBADDFA00264810 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4Q9TTP9WF7;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.edmitriev.TradeAppTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TradeApp.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TradeApp";
+			};
+			name = Debug;
+		};
+		826A0FA12FBADDFA00264810 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4Q9TTP9WF7;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.edmitriev.TradeAppTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TradeApp.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TradeApp";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -342,6 +481,15 @@
 			buildConfigurations = (
 				825A9FB52F6BA3B2009AF0AB /* Debug */,
 				825A9FB62F6BA3B2009AF0AB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		826A0FA22FBADDFA00264810 /* Build configuration list for PBXNativeTarget "TradeAppTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				826A0FA02FBADDFA00264810 /* Debug */,
+				826A0FA12FBADDFA00264810 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
